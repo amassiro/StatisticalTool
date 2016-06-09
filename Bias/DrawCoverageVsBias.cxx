@@ -1,5 +1,6 @@
 {
   
+  //---- functions for coverage   
   TCanvas* cc1 = new TCanvas ("cc1", "", 800, 600);  
   TF1* Nb = new TF1("Nb", "1./2. * (TMath::Erf((1-x)/sqrt(2)) - TMath::Erf((-1-x)/sqrt(2)))");
   Nb->Draw();
