@@ -16,7 +16,6 @@
   TCanvas* cc3 = new TCanvas ("cc3", "", 800, 600);
   // 68% - Nb(b, sigma) = 0  --> find sigma
   TF2* NbSigma = new TF2("NbError", "abs((1./2. * (TMath::Erf((1)/sqrt(2)) - TMath::Erf((-1)/sqrt(2)))) - 1./2. * (TMath::Erf((1-x)/sqrt(2)*y) - TMath::Erf((-1-x)/sqrt(2)*y)))", 0, 0.5, 1, 1.1);
-//   TF2* NbSigma = new TF2("NbError", "1./2. * (TMath::Erf((1-x)/sqrt(2)/y) - TMath::Erf((-1-x)/sqrt(2)/y))", 0, 1, 0, 2);
   NbSigma->Draw("colz");
   NbSigma->SetNpx(1000);
   NbSigma->SetNpy(1000);
