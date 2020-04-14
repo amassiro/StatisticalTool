@@ -46,8 +46,59 @@ Explanation:
     and viceversa
     
 
+    
+    
+    
 Including rateparam:
 
     text2workspace.py     datacard2.txt    -o datacard.root
 
+    
+        
+    combineTool.py -M Impacts -d datacard.root -m 125 --doInitialFit -t -1 --expectSignal=1 \
+                 --named bkg_norm  \
+                 --setParameterRanges bkg_norm=-2,4   \
+                 -n rateParams.125
+    
+    combineTool.py -M Impacts -d datacard.root -m 125 --doInitialFit -t -1 --expectSignal=1 -n nuis.125 
+
+    # do the fits for each nuisance
+    combineTool.py -M Impacts -d datacard.root -m 125 --doFits -t -1 --expectSignal=1 --job-mode condor --task-name nuis -n nuis.125 
+    
+    # do the fit for each rateParam
+    combineTool.py -M Impacts -d datacard.root -m 125 --doFits -t -1 --expectSignal=1 --job-mode condor --task-name rateParams \
+            --named bkg_norm \
+            --setParameterRanges bkg_norm=-2,4 \
+            -n rateParams.125
+    
+Wait for condor to end ...
+
+
+    #collect job output
+    combineTool.py -M Impacts -d datacard.root -m 125 -t -1 --expectSignal=1 -o impacts.125.nuis.json -n nuis.125
+    
+    combineTool.py -M Impacts -d datacard.root -m 125 -t -1 --expectSignal=1 --named bkg_norm   -o impacts.125.rateParams.json -n rateParams.125
+    
+    
+    #combine the two jsons
+    echo "{\"params\":" > impacts.125.json
+    jq -s ".[0].params+.[1].params" impacts.125.nuis.json impacts.125.rateParams.json >> impacts.125.json 
+    echo ",\"POIs\":" >> impacts.125.json
+    jq -s ".[0].POIs" impacts.125.nuis.json impacts.125.rateParams.json >> impacts.125.json
+    echo "}" >> impacts.125.json
+    # make plots
+    plotImpacts.py -i impacts.125.json -o impacts.125 
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
