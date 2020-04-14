@@ -17,21 +17,37 @@ Run
 
     text2workspace.py     datacard.txt    -o datacard.root
 
+And run:
+
     combineTool.py -M Impacts -d datacard.root -m 125 --doInitialFit -t -1 --expectSignal=1 -n nuis.125 
-    
-     
-    combineTool.py -M Impacts -d datacard.root -m 125 --doInitialFit -t -1 --expectSignal=1 \
-                 --named CMS_hww_WWnorm0j,CMS_hww_Topnorm0j,CMS_hww_DYttnorm0j,CMS_hww_WWnorm2j,CMS_hww_Topnorm2j,CMS_hww_DYttnorm2j  \
-                 --setParameterRanges CMS_hww_WWnorm0j=-2,4:CMS_hww_Topnorm0j=-2,4:CMS_hww_DYttnorm0j=-2,4:CMS_hww_WWnorm2j=-2,4:CMS_hww_Topnorm2j=-2,4:CMS_hww_DYttnorm2j=-2,4         \
-                 -n rateParams.125
-    
     
     # do the fits for each nuisance
     combineTool.py -M Impacts -d datacard.root -m 125 --doFits -t -1 --expectSignal=1 --job-mode condor --task-name nuis -n nuis.125 
     
-    # do the fit for each rateParam
-    combineTool.py -M Impacts -d datacard.root -m 125 --doFits -t -1 --expectSignal=1 --job-mode condor --task-name rateParams \
-            --named CMS_hww_WWnorm0j,CMS_hww_Topnorm0j,CMS_hww_DYttnorm0j,CMS_hww_WWnorm2j,CMS_hww_Topnorm2j,CMS_hww_DYttnorm2j \
-            --setParameterRanges CMS_hww_WWnorm0j=-2,4:CMS_hww_Topnorm0j=-2,4:CMS_hww_DYttnorm0j=-2,4:CMS_hww_WWnorm2j=-2,4:CMS_hww_Topnorm2j=-2,4:CMS_hww_DYttnorm2j=-2,4 \
-            -n rateParams.125
+Wait for condor to end ...
+
+    # collect job output
+    combineTool.py -M Impacts -d datacard.root -m 125 -t -1 --expectSignal=1 -o impacts.125.nuis.json -n nuis.125
+    
+    #combine the two jsons
+    echo "{\"params\":" > impacts.125.json
+    jq -s ".[0].params+.[1].params" impacts.125.nuis.json >> impacts.125.json 
+    echo ",\"POIs\":" >> impacts.125.json
+    jq -s ".[0].POIs" impacts.125.nuis.json >> impacts.125.json
+    echo "}" >> impacts.125.json
+    # make plots
+    plotImpacts.py -i impacts.125.json -o impacts.125 
+ 
+
+Explanation:
+
+    bla up -> measure smaller r:
+      red +1sigma -> on the left
+    and viceversa
+    
+
+Including rateparam:
+
+    text2workspace.py     datacard2.txt    -o datacard.root
+
     
