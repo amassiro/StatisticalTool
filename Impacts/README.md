@@ -12,7 +12,12 @@ Understanding the impact plots and their use
     scramv1 b -j 20
     
     cd /afs/cern.ch/user/a/amassiro/work/Latinos/Framework/AnalyticAnomalousCoupling/StatisticalTool/Impacts/
+
     
+Alternative:
+
+    /home/amassiro/Cern/Code/StatisticalTool/Impacts/
+
 Run
 
     text2workspace.py     datacard.txt    -o datacard.root
