@@ -43,6 +43,7 @@ Wait for condor to end ...
     # make plots
     plotImpacts.py -i impacts.125.json -o impacts.125 
  
+    plotImpacts.py -i impacts.125.nuis.json -o impacts.125 
 
 Explanation:
 
