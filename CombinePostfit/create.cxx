@@ -33,5 +33,35 @@ void create() {
   bkg->Write();
   sig->Write();
   data->Write();
+
+
+
+
+
+
+// 
+//   1 single bin case
+// 
+// 
+//   TH1F* bkg = new TH1F ("histo_bkg", "bkg", 1, 0, 1);
+//   
+//   bkg-> SetBinContent (1, 3);
+//   
+//   
+//   TH1F* sig = new TH1F ("histo_sig", "sig", 1, 0, 1);
+//   
+//   sig-> SetBinContent (1, 1);
+//   
+//   
+//   TH1F* data = new TH1F ("histo_Data", "data", 1, 0, 1);
+//   
+//   data-> SetBinContent (1, 4);
+//   
+//   TFile* fileOut = new TFile ("test.root", "RECREATE");
+//   
+//   bkg->Write();
+//   sig->Write();
+//   data->Write();
+// 
   
 }

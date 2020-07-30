@@ -5,6 +5,11 @@ See
 
     https://hypernews.cern.ch/HyperNews/CMS/get/higgs-combination/1493.html
 
+Where:
+
+    /afs/cern.ch/user/a/amassiro/Framework/AnalyticAnomalousCoupling/StatisticalTool
+    
+    
 Prepare datacards
 ====
 
@@ -83,6 +88,58 @@ Instructions by Adinda
 [*]
 http://cms-analysis.github.io/CombineHarvester/post-fit-shapes-ws.html
 
+
+
+Follow up
+====
+
+Fit using control regions and then combine only part of them
+
+That is also possible with this method - you'll have to make a new
+datacard and workspace with just the two bins you want to combine,
+though. As long as in that workspace you have the same parameters
+affecting these two bins as you have in the fit result using 3 bins, you
+can then still use that fit result to extract the post-fit shapes from
+the datacard/workspace with only the 2 bins.
+
+
+    text2workspace.py datacard3.txt -o datacard3.root
+
+    
+    combineCards.py   bin1=datacard1.txt  \
+                      bin2=datacard2.txt  \
+                  >   combined12.txt
+
+                  
+    text2workspace.py combined12.txt -o combined12.root
+
+    
+    
+    combineCards.py   bin1=datacard1.txt  \
+                      bin2=datacard2.txt  \
+                      bin3=datacard3.txt  \
+                  >   combined.txt
+
+                  
+    text2workspace.py combined.txt -o combined.root
+
+             
+    mkdir fitDiagnosticsCombined         
+    combine -M FitDiagnostics    combined.root   --out fitDiagnosticsCombined
+    
+
+The workspace and the datacard are for the bins where I have the same variable.
+While the "fitdiagnostic" result is from the combined (3 bins) fit
+
+    
+    PostFitShapesFromWorkspace  \
+          -w combined12.root  \
+          -d combined12.txt \
+          -o output_histograms.root \
+          --postfit --sampling \
+          -f fitDiagnosticsCombined/fitDiagnostics.root:fit_s  \
+          --total-shapes
+    
 
 
 
