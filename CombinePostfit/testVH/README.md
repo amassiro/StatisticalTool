@@ -51,3 +51,10 @@ Combine:
           -f fitDiagnosticsCombined/fitDiagnostics.root:fit_s  \
           --total-shapes
 
+
+          
+    PostFitShapesFromWorkspace \
+         -w FullRunII_ZH3l_SR2j.root \
+         -d FullRunII_ZH3l_SR2j.txt \
+         -o output_SR2j.root \
+         --postfit --sampling -f fitDiagnosticsVH_obs.root:fit_s --total-shapes
