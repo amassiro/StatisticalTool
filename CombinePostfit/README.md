@@ -161,3 +161,18 @@ Instructions by Nick
 
 
 
+
+In Latinos
+====
+
+    cmsenv
+
+    mkPostFitCombinedPlot.py   \
+               --inputFilePostFitShapesFromWorkspace  output_SR2j.root   \
+               --outputFile  mytest.root  \
+               --kind   P  \
+               --cutName  combinedMy  \
+               --variable mll   
+               
+    
+    
