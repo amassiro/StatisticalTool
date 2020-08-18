@@ -167,6 +167,14 @@ In Latinos
 
     cmsenv
 
+    ../../../LatinoAnalysis/ShapeAnalysis/scripts/mkPostFitCombinedPlot.py   \
+               --inputFilePostFitShapesFromWorkspace  output_SR2j.root   \
+               --outputFile  mytest.root  \
+               --kind   P  \
+               --cutName  combinedMy  \
+               --variable mll   
+               
+    
     mkPostFitCombinedPlot.py   \
                --inputFilePostFitShapesFromWorkspace  output_SR2j.root   \
                --outputFile  mytest.root  \
