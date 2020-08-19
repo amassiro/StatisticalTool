@@ -174,8 +174,8 @@ In Latinos
                --cutName  combinedMy  \
                --variable mll  \
                --structureFile Full2016_v6/structure.py \
-               --plotFile Full2016_v6/plot.py
-               
+               --plotFile Full2016_v6/plot.py \
+               --lumiText  '36 + 42 /fb'
                
                
     
@@ -186,7 +186,8 @@ In Latinos
                --cutName  combinedMy  \
                --variable mll   \
                --structureFile Full2016_v6/structure.py   \
-               --plotFile Full2016_v6/plot.py
+               --plotFile Full2016_v6/plot.py \
+               --lumiText  '36 + 42 /fb'
                
     
 Then run simply mkPlot, after changing the cuts.py and variables.py
