@@ -172,7 +172,11 @@ In Latinos
                --outputFile  mytest.root  \
                --kind   P  \
                --cutName  combinedMy  \
-               --variable mll   
+               --variable mll  \
+               --structureFile Full2016_v6/structure.py \
+               --plotFile Full2016_v6/plot.py
+               
+               
                
     
     mkPostFitCombinedPlot.py   \
@@ -180,7 +184,17 @@ In Latinos
                --outputFile  mytest.root  \
                --kind   P  \
                --cutName  combinedMy  \
-               --variable mll   
+               --variable mll   \
+               --structureFile Full2016_v6/structure.py   \
+               --plotFile Full2016_v6/plot.py
                
+    
+Then run simply mkPlot, after changing the cuts.py and variables.py
+
+
+    mkPlot.py --pycfg=configuration_combined.py --inputFile mytest.root   --onlyPlot=cratio --linearOnly --showIntegralLegend=1
+
+    
+    
     
     
