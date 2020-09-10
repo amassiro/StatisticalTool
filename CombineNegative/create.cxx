@@ -5,20 +5,20 @@ void create() {
   
   TH1F* bkg1 = new TH1F ("histo_bkg1", "bkg1", 3, 0, 3);
   
-  bkg1-> SetBinContent (1, 3);
+  bkg1-> SetBinContent (1, 5);
   bkg1-> SetBinContent (2, 20);
   bkg1-> SetBinContent (3, 10);
    
-  // 3+20+10 = 33
+  // 5+20+10 = 35
 
   
   TH1F* bkg2 = new TH1F ("histo_bkg2", "bkg2", 3, 0, 3);
   
   bkg2-> SetBinContent (1, -1);
-  bkg2-> SetBinContent (2, -2);
-  bkg2-> SetBinContent (3, -7);
+  bkg2-> SetBinContent (2, -3);
+  bkg2-> SetBinContent (3, -2);
 
-  // -1 -2 -7 = -10
+  // -1 -2 -3 = -6
   
   TH1F* sig = new TH1F ("histo_sig", "sig", 3, 0, 3);
   

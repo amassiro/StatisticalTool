@@ -13,11 +13,14 @@ bin              bin1      bin1
 process          sig       bkg1    
 process          0         1       
 
-rate             10         33      
+rate             10         35      
 -----------------------------------
 lumi    lnN     1.02        -      
 bla     lnN     1.4         -      
 only_bkg  lnN      -        1.4    
+
+
+* autoMCStats 10  0
 
 
 
