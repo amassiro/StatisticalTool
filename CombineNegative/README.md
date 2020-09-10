@@ -115,5 +115,24 @@ Done in 0.00 min (cpu), 0.00 min (real)
 
 
 
+
+
+
+
+
+and without autoMCstat
+
+    datacard.txt 
     
-    
+  --- FitDiagnostics ---
+Best fit r: 1  -0.576595/+0.843583  (68% CL)
+Done in 0.00 min (cpu), 0.00 min (real)
+
+
+
+    datacardPos.txt 
+
+ --- FitDiagnostics ---
+Best fit r: 1  -0.642184/+0.913228  (68% CL)
+Done in 0.00 min (cpu), 0.00 min (real)
+
