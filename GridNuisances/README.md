@@ -55,7 +55,17 @@ Now adding the constraint:
            --algo=grid --points 10000              \
            --setParameterRanges  r=-2,3:bla=-3,3
            
-    
+
+    combine -M    MultiDimFit    datacard.root     \
+           --redefineSignalPOIs r                  \
+           --parameters bla                        \
+           --parameters r                          \
+           -n "test1"    -m 125                    \
+           --algo=grid --points 10000              \
+           --setParameterRanges  r=-2,3:bla=-3,3   \
+           -t -1
+           
+           
     -> ok scan 2d con r vs bla, using the constraint on bla, roughly ~ bla shifted by +/-1 for 1 sigma along its direction    
            
            
