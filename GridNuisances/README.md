@@ -13,7 +13,12 @@ Here: test on how to perform 2D scan of nuisances, keeping their priors.
 
     text2workspace.py datacard.txt -o datacard.root
     
-    combine -M FitDiagnostics    datacard.root   
+    combine -M    MultiDimFit    datacard.root     \
+           --redefineSignalPOIs r,bla              \
+           -n "test1"    -m 125                    \
+           --algo=grid --points 10000               \
+           --setParameterRanges  r=-2,3:bla=-3,3      
+
     
-    
+    r00t higgsCombinetest1.MultiDimFit.mH125.root  draw2d.cxx\(\"r\",\"bla\",\"r\",\"bla\"\)    
     
