@@ -9,6 +9,7 @@ Where:
 
     /afs/cern.ch/user/a/amassiro/Framework/AnalyticAnomalousCoupling/StatisticalTool
     
+    /afs/cern.ch/user/a/amassiro/Framework/Postprocessing/LatinosOfficial/CMSSW_10_6_4/src   x latino
     
 Prepare datacards
 ====
