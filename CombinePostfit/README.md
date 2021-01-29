@@ -33,6 +33,9 @@ combine
     cd -
     
 
+    cd ../../../Combine/CMSSW_10_2_13/src/
+    cmsenv
+    cd -
     
     
     text2workspace.py datacard1.txt -o datacard1.root
@@ -198,5 +201,81 @@ Then run simply mkPlot, after changing the cuts.py and variables.py
 
     
     
+ 
+ 
+ 
+Control plots
+====
+
+
+Make control plots using the output from a fit.
+And possibly combine control plots adding them together.
+
+
+    cd ../../../Combine/CMSSW_10_2_13/src/
+    cmsenv
+    cd -
+
     
+    combineCards.py   binA=datacard1.txt  \
+                      binB=datacard2.txt  \
+                  >   combined_for_plots.txt
+
+    
+    combineCards.py   bin1=datacard1.txt  \
+                      bin2=datacard2.txt  \
+                      bin3=datacard3.txt  \
+                  >   combined.txt
+                  
+    text2workspace.py combined.txt           -o combined.root
+    text2workspace.py combined_for_plots.txt -o combined_for_plots.root
+             
+             
+    mkdir fitDiagnosticsCombined         
+    combine -M FitDiagnostics    combined.root   --out fitDiagnosticsCombined
+    
+    
+    PostFitShapesFromWorkspace  \
+          -w combined_for_plots.root  \
+          -d combined_for_plots.txt \
+          -o output_histograms.root \
+          --postfit --sampling \
+          -f fitDiagnosticsCombined/fitDiagnostics.root:fit_s  \
+          --total-shapes
+    
+latino
+
+    cd ../../../Postprocessing/LatinosOfficial/CMSSW_10_6_4/src/
+
+    cmsenv
+
+    cd -
+    
+    ../../../Postprocessing/LatinosOfficial/CMSSW_10_6_4/src/LatinoAnalysis/ShapeAnalysis/scripts/mkPostFitCombinedPlot.py   \
+               --inputFilePostFitShapesFromWorkspace  output_histograms.root   \
+               --outputFile  mytest.root  \
+               --kind   P  \
+               --cutName  combinedMy  \
+               --variable mll  \
+               --structureFile structure.py \
+               --plotFile plot.py \
+               --lumiText  '36 + 42 /fb'
+               
+               
+    ../../../Postprocessing/LatinosOfficial/CMSSW_10_6_4/src/LatinoAnalysis/ShapeAnalysis/scripts/mkPostFitCombinedPlot.py   \
+               --inputFilePostFitShapesFromWorkspace  output_histograms.root   \
+               --outputFile  mytest.root  \
+               --kind   p  \
+               --cutName  combinedMy  \
+               --variable mll  \
+               --structureFile structure.py \
+               --plotFile plot.py \
+               --lumiText  '36 + 42 /fb'
+               
+               
+               
+               
+               
+    
+
     

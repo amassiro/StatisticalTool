@@ -8,9 +8,16 @@ void create() {
   bkg-> SetBinContent (1, 3);
   bkg-> SetBinContent (2, 20);
   bkg-> SetBinContent (3, 10);
-   
+  
   // 3+20+10 = 33
 
+  bkg-> SetBinError (1, 1);
+  bkg-> SetBinError (2, 2);
+  bkg-> SetBinError (3, 4);
+  
+
+  //----------
+  
   TH1F* sig = new TH1F ("histo_sig", "sig", 3, 0, 3);
   
   sig-> SetBinContent (1, 1);
@@ -18,7 +25,13 @@ void create() {
   sig-> SetBinContent (3, 3);
   
   // 1+2+3 = 6
+
+  sig-> SetBinContent (1, 0.3);
+  sig-> SetBinContent (2, 0.1);
+  sig-> SetBinContent (3, 0.1);
+
   
+  //----------
   TH1F* data = new TH1F ("histo_Data", "data", 3, 0, 3);
   
   data-> SetBinContent (1, 4);
@@ -28,6 +41,7 @@ void create() {
   // 4+22+13 = 39
   
   
+  //----------
   TFile* fileOut = new TFile ("test.root", "RECREATE");
   
   bkg->Write();
