@@ -26,9 +26,9 @@ void create() {
   
   // 1+2+3 = 6
 
-  sig-> SetBinContent (1, 0.3);
-  sig-> SetBinContent (2, 0.1);
-  sig-> SetBinContent (3, 0.1);
+  sig-> SetBinError (1, 0.3);
+  sig-> SetBinError (2, 0.1);
+  sig-> SetBinError (3, 0.1);
 
   
   //----------
@@ -60,18 +60,20 @@ void create() {
 //   TH1F* bkg = new TH1F ("histo_bkg", "bkg", 1, 0, 1);
 //   
 //   bkg-> SetBinContent (1, 3);
+//   bkg-> SetBinError   (1, 0.001);
 //   
 //   
 //   TH1F* sig = new TH1F ("histo_sig", "sig", 1, 0, 1);
 //   
 //   sig-> SetBinContent (1, 1);
+//   sig-> SetBinError   (1, 0.001);
 //   
 //   
 //   TH1F* data = new TH1F ("histo_Data", "data", 1, 0, 1);
 //   
 //   data-> SetBinContent (1, 4);
 //   
-//   TFile* fileOut = new TFile ("test.root", "RECREATE");
+//   TFile* fileOut = new TFile ("test3.root", "RECREATE");
 //   
 //   bkg->Write();
 //   sig->Write();

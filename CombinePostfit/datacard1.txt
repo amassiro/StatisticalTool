@@ -16,8 +16,12 @@ process          0         1
 rate             6         33           
 -----------------------------------------
 lumi    lnN     1.02        -            
-bla     lnN     1.4         -            
-only_bkg  lnN      -        1.4          
+bla     lnN     1.04         -            
+only_bkg  lnN      -        1.04   
+
+
+bin1 autoMCStats 10 1 1
+
 
 
 

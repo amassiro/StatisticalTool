@@ -216,12 +216,22 @@ And possibly combine control plots adding them together.
     cmsenv
     cd -
 
+    combineCards.py   bin1=datacard1.txt  \
+                      bin2=datacard2.txt  \
+                  >   combined_for_plots.txt
+    
     
     combineCards.py   binA=datacard1.txt  \
                       binB=datacard2.txt  \
                   >   combined_for_plots.txt
 
-    
+
+                  
+Beware: nuisances that are defined in A and B, but are not present in 1 and 2
+are NOT used in the estimation of the uncertainty bar!
+[experimentally checked]
+
+
     combineCards.py   bin1=datacard1.txt  \
                       bin2=datacard2.txt  \
                       bin3=datacard3.txt  \
@@ -274,8 +284,13 @@ latino
                
                
                
-               
+    mkPlot.py --pycfg=configuration_combined.py --inputFile mytest.root   --onlyPlot=cratio --linearOnly --showIntegralLegend=1            
                
     
+All together:
 
-    
+    sh test_script.sh
+
+
+
+
