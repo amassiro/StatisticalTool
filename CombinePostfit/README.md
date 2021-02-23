@@ -282,7 +282,9 @@ latino
     /afs/cern.ch/work/a/amassiro/Latinos/Framework/CMSSW_10_6_4/src/LatinoAnalysis/ShapeAnalysis/scripts/mkPostFitControlPlots.py  --inputFileHisto mytest.root \
                --outputFileHistoClone mytest_backup.root   \
                --listOfFilesOriginal test1.root,test2.root  \
-               --plotFile plot_combined.py
+               --plotFile plot_combined.py   \
+               --cutName  combinedMy  \
+               --variable mll
     
     
         
