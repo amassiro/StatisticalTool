@@ -211,15 +211,11 @@ Control plots
 Make control plots using the output from a fit.
 And possibly combine control plots adding them together.
 
+    cd /afs/cern.ch/user/a/amassiro/Framework/AnalyticAnomalousCoupling/StatisticalTool/CombinePostfit/
 
     cd ../../../Combine/CMSSW_10_2_13/src/
     cmsenv
     cd -
-
-    combineCards.py   bin1=datacard1.txt  \
-                      bin2=datacard2.txt  \
-                  >   combined_for_plots.txt
-    
     
     combineCards.py   binA=datacard1.txt  \
                       binB=datacard2.txt  \
@@ -232,8 +228,7 @@ are NOT used in the estimation of the uncertainty bar!
 [experimentally checked]
 
 
-    combineCards.py   bin1=datacard1.txt  \
-                      bin2=datacard2.txt  \
+    combineCards.py   bin2=datacard2.txt  \
                       bin3=datacard3.txt  \
                   >   combined.txt
                   
@@ -243,6 +238,7 @@ are NOT used in the estimation of the uncertainty bar!
              
     mkdir fitDiagnosticsCombined         
     combine -M FitDiagnostics    combined.root   --out fitDiagnosticsCombined
+    
     
     
     PostFitShapesFromWorkspace  \
@@ -255,7 +251,7 @@ are NOT used in the estimation of the uncertainty bar!
     
 latino
 
-    cd ../../../Postprocessing/LatinosOfficial/CMSSW_10_6_4/src/
+    cd /afs/cern.ch/work/a/amassiro/Latinos/Framework/CMSSW_10_6_4/src/LatinoAnalysis/
 
     cmsenv
 
@@ -282,7 +278,16 @@ latino
                --plotFile plot.py \
                --lumiText  '36 + 42 /fb'
                
-               
+     
+    /afs/cern.ch/work/a/amassiro/Latinos/Framework/CMSSW_10_6_4/src/LatinoAnalysis/ShapeAnalysis/scripts/mkPostFitControlPlots.py  --inputFileHisto mytest.root \
+               --outputFileHistoClone mytest_backup.root   \
+               --listOfFilesOriginal test1.root,test2.root  \
+               --plotFile plot_combined.py
+    
+    
+        
+       
+        
                
     mkPlot.py --pycfg=configuration_combined.py --inputFile mytest.root   --onlyPlot=cratio --linearOnly --showIntegralLegend=1            
                
