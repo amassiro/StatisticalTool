@@ -293,6 +293,27 @@ latino
                
     mkPlot.py --pycfg=configuration_combined.py --inputFile mytest.root   --onlyPlot=cratio --linearOnly --showIntegralLegend=1            
                
+
+               
+Or alternatively:
+
+
+    /afs/cern.ch/work/a/amassiro/Latinos/Framework/CMSSW_10_6_4/src/LatinoAnalysis/ShapeAnalysis/scripts/mkPostFitCombinedPlot.py   \
+               --inputFilePostFitShapesFromWorkspace  output_histograms.root   \
+               --outputFile  mytest.root  \
+               --kind   P  \
+               --cutName  combinedMy  \
+               --variable mll  \
+               --structureFile structure.py \
+               --plotFile plot.py \
+               --lumiText  '36 + 42 /fb' \
+               --listOfFilesOriginal test1.root,test2.root  \
+               --nonFitVariable
+
+               
+               
+    mkPlot.py --pycfg=configuration_combined.py --inputFile mytest.root   --onlyPlot=cratio --linearOnly --showIntegralLegend=1            
+
     
 All together:
 
