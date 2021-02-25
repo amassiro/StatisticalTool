@@ -28,7 +28,38 @@ void test1(int reference = 10000, int test = 1000) {
   std::cout << " prob KS        test->reference = " << histo_test->KolmogorovTest(histo_reference)      << std::endl;
   std::cout << " prob KS (toys) test->reference = " << histo_test->KolmogorovTest(histo_reference, "X") << std::endl;
   std::cout << " ------------- " << std::endl;
+   
+  float principal_delta = histo_reference->KolmogorovTest(histo_test, "M");
+
+  TCanvas* cc = new TCanvas ("cc", "", 800, 600);
+  TH1F* histo_delta = new TH1F ("histo_delta", "", 300, 0, 1.0);
+  TH1F* histo_delta_more = new TH1F ("histo_delta_more", "", 300, 0, 1.0);
+  
+  int numtoys = 100000;
+  for (int i=0; i<numtoys; i++) {
+   
+    histo_test->Reset();
+    histo_test->FillRandom("gaus", test);
+    histo_test->Scale(1. * reference / test);
+    histo_test->SetLineColor(kRed);
     
+    float delta = histo_reference->KolmogorovTest(histo_test, "M");
+    histo_delta->Fill (delta);
+    
+    if (delta > principal_delta) {
+      histo_delta_more->Fill (delta);
+    }
+  }
+  
+  histo_delta->Draw("hist");
+  
+  
+  std::cout << " ------------- " << std::endl;
+  std::cout << " prob delta KS       reference->test = " << histo_delta_more->Integral() / histo_delta->Integral() << std::endl;
+  std::cout << " ------------- " << std::endl;
+  
+  
+  
 }
 
 
