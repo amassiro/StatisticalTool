@@ -32,7 +32,7 @@ void test1(int reference = 10000, int test = 1000) {
   float principal_delta = histo_reference->KolmogorovTest(histo_test, "M");
 
   //
-  // now check the pdf of "delta" to see if the option "X" is ok, even with more toys
+  // now check the pdf of "delta" to see if the option "X" is ok, even with more toys, and with the true pdf, the gauss
   //
   TCanvas* cc = new TCanvas ("cc", "", 800, 600);
   TH1F* histo_delta = new TH1F ("histo_delta", "", 300, 0, 1.0);
