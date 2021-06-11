@@ -60,5 +60,8 @@ Plot:
     r99t higgsCombineTest.GoodnessOfFit.mH120.1.root  higgsCombineTest.GoodnessOfFit.mH120.root  draw.cxx
     
     r99t higgsCombineTestSnapshot.GoodnessOfFit.mH120.1.root  higgsCombineTest.GoodnessOfFit.mH120.root  draw.cxx
+
     
-    
+Result:
+
+![chi2](c1.png)
