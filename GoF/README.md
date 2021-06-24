@@ -1,10 +1,9 @@
 Goodness of fit
 ====
 
-    http://cms-analysis.github.io/HiggsAnalysis-CombinedLimit/part3/commonstatsmethods/#goodness-of-fit-tests
+    http://cms-analysis.github.io/HiggsAnalysis-CombinedLimit/part3/commonstatsmethods#goodness-of-fit-tests
     
-    http://cms-analysis.github.io/HiggsAnalysis-CombinedLimit/part3/runningthetool/#submission-to-condor
-
+    http://cms-analysis.github.io/HiggsAnalysis-CombinedLimit/part3/runningthetool#submission-to-condor
     
 Use "saturated" as model.
 
