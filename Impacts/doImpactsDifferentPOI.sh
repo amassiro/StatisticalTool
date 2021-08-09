@@ -1,8 +1,25 @@
 
 
-combineTool.py -M Impacts -d cards/$1_$2.root -n $1_$2 -m 125 --doInitialFit -t -1 --setParameters muV=1.0,Fai=0.1 --redefineSignalPOIs=Fai --freezeParameters=muV --X-rtd MINIMIZER_analytic 
-combineTool.py -M Impacts -d cards/$1_$2.root -n $1_$2 -m 125 --doFits -t -1 --setParameters muV=1.0,Fai=0.1 --redefineSignalPOIs=Fai --freezeParameters=muV --X-rtd MINIMIZER_analytic 
-combineTool.py -M Impacts -d cards/$1_$2.root -n $1_$2 -m 125 -o aimpacts_$1_$2.json -t -1 --setParameters muV=1.0,Fai=0.1 --redefineSignalPOIs=Fai --freezeParameters=muV 
-plotImpacts.py -i aimpacts_$1_$2.json -o aimpacts_$1_$2
+# text2workspace.py     datacard2.txt    -o datacard.root
+text2workspace.py        datacard1opLinearOnly.txt -P HiggsAnalysis.AnalyticAnomalousCoupling.AnomalousCouplingLinearEFTNegative:analiticAnomalousCouplingLinearEFTNegative   -o   datacard.root    --X-allow-no-signal  --PO eftOperators=cG
+          
+combineTool.py -M Impacts -d datacard.root -n blablabla -m 125 --doInitialFit    -t -1 --setParameters r=1.0,cG=0.0 --redefineSignalPOIs=cG --freezeParameters=r --X-rtd MINIMIZER_analytic 
+
+combineTool.py -M Impacts -d datacard.root -n blablabla -m 125 --doFits          -t -1 --setParameters r=1.0,cG=0.0 --redefineSignalPOIs=cG --freezeParameters=r --X-rtd MINIMIZER_analytic 
+
+# 
+# wait for condor to end ...
+# 
+
+# 
+# collect jobs output
+# 
+combineTool.py -M Impacts -d datacard.root -n blablabla -m 125 -o my_impact.json -t -1 --setParameters r=1.0,cG=0.0 --redefineSignalPOIs=cG --freezeParameters=r 
+
+# 
+# plot
+# 
+
+plotImpacts.py -i my_impact.json -o my_impact
 
 
