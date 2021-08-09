@@ -98,6 +98,13 @@ Wait for condor to end ...
     
     
     
+Impacts with a different Parameter of Interest (POI)
+
+    doImpactsDifferentPOI.sh
+
+
+        
+    
     
     
     
