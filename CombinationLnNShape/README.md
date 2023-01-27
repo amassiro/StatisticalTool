@@ -84,4 +84,14 @@ Fit and likelihood scan:
     
 
     
+Result:
+
+![chi2](c1.png)
+
+The two likelihood scans overlap, good
+
+
+
+
+    
     

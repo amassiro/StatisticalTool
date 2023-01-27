@@ -1,0 +1,23 @@
+Combination of bin2=datacard_2.txt  bin1=datacard_3.txt
+imax 2 number of bins
+jmax 1 number of processes minus 1
+kmax 4 number of nuisance parameters
+----------------------------------------------------------------------------------------------------------------------------------
+shapes *         bin1      testNew.root histo_$PROCESS histo_$PROCESS_$SYSTEMATIC
+shapes data_obs  bin1      testNew.root histo_Data
+shapes *         bin2      test.root histo_$PROCESS histo_$PROCESS_$SYSTEMATIC
+shapes data_obs  bin2      test.root histo_Data
+----------------------------------------------------------------------------------------------------------------------------------
+bin          bin2   bin1 
+observation  45     45   
+----------------------------------------------------------------------------------------------------------------------------------
+bin                               bin2   bin2   bin1   bin1 
+process                           sig    bkg1   sig    bkg1 
+process                           0      1      0      1    
+rate                              10     35     10     35   
+----------------------------------------------------------------------------------------------------------------------------------
+bla                     lnN       1.1    1.2    1.1    1.2  
+jes                     shape     -      1.0    1.0    1.0  
+lumi                    lnN       1.02   -      1.02   -    
+only_bkg                lnN       -      1.4    -      1.4  
+bin2 autoMCStats 10 0 1
