@@ -7,7 +7,7 @@ What happens when you combine two datacards, one with shape, one with lnN for th
 
 Where:
 
-    /afs/cern.ch/user/a/amassiro/Framework/AnalyticAnomalousCoupling/StatisticalTool/CombinationLnNShape
+    cd /afs/cern.ch/user/a/amassiro/Framework/AnalyticAnomalousCoupling/StatisticalTool/CombinationLnNShape
     
     cd /afs/cern.ch/user/a/amassiro/Framework/Combine/CMSSW_10_2_13/src/
     cmsenv
@@ -33,8 +33,8 @@ Combine datacards:
                       >   datacard_combined.txt
  
  
-    combineCards.py   bin1=datacard_2.txt  \
-                      bin2=datacard_3.txt  \
+    combineCards.py   bin2=datacard_2.txt  \
+                      bin1=datacard_3.txt  \
                       >   datacard_combined_with_histos.txt
 
  
@@ -58,6 +58,7 @@ Fit and likelihood scan:
 
     text2workspace.py datacard_1.txt -o datacard_1.root
     text2workspace.py datacard_2.txt -o datacard_2.root
+
     text2workspace.py datacard_combined.txt -o datacard.root
     
     text2workspace.py datacard_combined_with_histos.txt -o datacard_combined_with_histos.root
@@ -78,6 +79,7 @@ Fit and likelihood scan:
            
            
     r00t higgsCombinetest1.MultiDimFit.mH125.root  draw.cxx   
+    r00t higgsCombinetest1histo.MultiDimFit.mH125.root  draw.cxx   
     r00t higgsCombinetest1.MultiDimFit.mH125.root higgsCombinetest1histo.MultiDimFit.mH125.root  drawCompare.cxx   
     
 
