@@ -32,6 +32,6 @@ for branches in list_branches:
     toDo = "root -l -q -b " +  args.input + "  Draw2DLine.cxx\(\\\"poi\\\",\\\""  +   branches.GetName()  + "\\\",\\\""+ args.poi +"\\\",\\\"" +  branches.GetName()   + "\\\",\\\"" +   branches.GetName()   + "\\\"\) "
     #toDo = "root -l -q -b " +  args.input + "  Draw2DLine.cxx\(\\\"#mu\\\",\\\""  +   branches.GetName()  + "\\\",\\\""+ args.poi +"\\\",\\\"" +  branches.GetName()   + "\\\",\\\"" +   branches.GetName()   + "\\\"\) "
     print toDo
-    #os.system (toDo)
+    os.system (toDo)
   
   
