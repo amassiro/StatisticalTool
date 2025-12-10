@@ -12,7 +12,7 @@ void DrawBiasVsContaminationCoverage() {
   int Nbin = 160000;
 
   const int Nbkg = 3000; // num of bkg
-  const int Nsig = 400; // num of sig
+  const int Nsig = 200; // num of sig
 
   std::vector<float> x_f;
   std::vector<float> y_f;
