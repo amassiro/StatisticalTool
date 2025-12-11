@@ -7,9 +7,9 @@ void DrawBiasVsContamination() {
 
   int min = 100;
   int max = 180;
-  int Nbin = 1000;
+  int Nbin = 1600*5/4;
 
-  const int Nbkg = 30000; // num of bkg
+  const int Nbkg = 40000; // num of bkg
   const int Nsig = 2000; // num of sig
 
 
@@ -18,21 +18,48 @@ void DrawBiasVsContamination() {
   std::vector<float> ex_f;
   std::vector<float> ey_f;
 
-  int maxContamination = 30;
+  int maxContamination = 10;
+  // int maxContamination = 1;
+
+  TF1 *pdf_bkg_1 = new TF1("pdf_bkg_1", "exp(-x/80.)", min, max);
+  TF1 *pdf_bkg_2 = new TF1("pdf_bkg_2", "5 * 0.5 * exp(-5*x/195.)", min, max);
+  TF1 *pdf_bkg_3 = new TF1("pdf_bkg_3", "exp(-x/80.) + 5 * 0.5 * exp(-5*x/195.)", min, max);
+
+  TCanvas *c_backgrounds = new TCanvas("c_backgrounds", "Functions", 800, 600);
+  c_backgrounds->Divide(2,2);
+  c_backgrounds->cd(1);
+  pdf_bkg_1->Draw("PL");  pdf_bkg_1->SetLineColor(kRed);
+  c_backgrounds->cd(2);
+  pdf_bkg_2->Draw("PL");  pdf_bkg_2->SetLineColor(kBlue);
+  c_backgrounds->cd(3);
+  pdf_bkg_3->Draw("PL");  pdf_bkg_3->SetLineColor(kGreen+2);
+  c_backgrounds->cd(4);
+  pdf_bkg_1->Draw("PL");       pdf_bkg_1->SetLineColor(kRed);
+  pdf_bkg_2->Draw("PL same");  pdf_bkg_2->SetLineColor(kBlue);
+  pdf_bkg_3->Draw("PL same");  pdf_bkg_3->SetLineColor(kGreen+2);
+
 
   TCanvas *c_final = new TCanvas("c_final", "Mass spectrum", 800, 600);
   c_final->Divide(sqrt(maxContamination)+1, sqrt(maxContamination)+1);
 
+  TH1F *h_data = new TH1F("h_data", "Events generated from generic function; x; counts", Nbin, min, max);
+  TF1 *pdf_sig = new TF1("pdf_sig", "exp(-(x-125)*(x-125)/(2*2))", min, max);
+
   for (int iContamination = 0; iContamination<maxContamination; iContamination++){
 
-    TString bkgnamefunction = Form("exp(-x/80.) + 0.5 * %.2f * exp(-3*x/80.)", 1. * iContamination / maxContamination);
+    // TString bkgnamefunction = Form("exp(-x/80.) + 0.5 * %.2f * 2", 1. * iContamination / maxContamination);
+    // TString bkgnamefunction = Form("exp(-x/80.) + 0.5 * %.2f * 0.1*exp(-3*x/80.)*(-100+(x-140)*(x-140))", 1. * iContamination / maxContamination);
+    // TString bkgnamefunction = Form("exp(-x/80.) + 0.5 * %.2f * exp(-x/120.)", 1. * iContamination / maxContamination);
+    // TString bkgnamefunction = Form("exp(-x/80.) + 0.5 * %.2f * exp(-3*x/80.)", 1. * iContamination / maxContamination);
+    TString bkgnamefunction = Form("exp(-x/80.) + 5 * %.2f * exp(-5*x/195.)", 1. * iContamination / maxContamination);
 
     std::cout << " bkgnamefunction = " << bkgnamefunction.Data() << std::endl;
 
     TF1 *pdf_bkg = new TF1("pdf_bkg", bkgnamefunction.Data(), min, max);
-    TF1 *pdf_sig = new TF1("pdf_sig", "exp(-(x-125)*(x-125)/(2*2))", min, max);
 
-    TH1F *h_data = new TH1F("h_data", "Events generated from generic function; x; counts", Nbin, min, max);
+    h_data->Reset();
+
+    // TH1F *h_data = new TH1F("h_data", "Events generated from generic function; x; counts", Nbin, min, max);
 
     for (int i = 0; i < Nbkg; i++) {
       double x = pdf_bkg->GetRandom();

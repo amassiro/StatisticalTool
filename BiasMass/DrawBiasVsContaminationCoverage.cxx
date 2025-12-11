@@ -9,17 +9,17 @@ void DrawBiasVsContaminationCoverage() {
 
   int min = 100;
   int max = 180;
-  int Nbin = 160000;
+  int Nbin = 1600*5/4;
 
-  const int Nbkg = 3000; // num of bkg
-  const int Nsig = 200; // num of sig
+  const int Nbkg = 40000; // num of bkg
+  const int Nsig = 2000; // num of sig
 
   std::vector<float> x_f;
   std::vector<float> y_f;
   std::vector<float> ex_f;
   std::vector<float> ey_f;
 
-  int maxContamination = 2;
+  int maxContamination = 4;
 
   TH1F *h_data = new TH1F("h_data", "Events generated from generic function; x; counts", Nbin, min, max);
 
@@ -28,6 +28,26 @@ void DrawBiasVsContaminationCoverage() {
   TF1 *fit_function = new TF1("fit_function", "[0]*exp(-x/[1]) + [2]*1/(sqrt(2*3.14*[4]*[4]))*exp(-(x-[3])*(x-[3])/(2*[4]*[4]))", min, max);
   TF1 *fit_function_sig = new TF1("fit_function_sig", "[0]*1/(sqrt(2*3.14*[2]*[2]))*exp(-(x-[1])*(x-[1])/(2*[2]*[2]))", min, max);
   TF1 *pdf_sig = new TF1("pdf_sig", "exp(-(x-125)*(x-125)/(2*2))", min, max);
+
+
+  TF1 *pdf_bkg_1 = new TF1("pdf_bkg_1", "exp(-x/80.)", min, max);
+  TF1 *pdf_bkg_2 = new TF1("pdf_bkg_2", "5 * 0.5 * exp(-5*x/195.)", min, max);
+  TF1 *pdf_bkg_3 = new TF1("pdf_bkg_3", "exp(-x/80.) + 5 * 0.5 * exp(-5*x/195.)", min, max);
+
+  TCanvas *c_backgrounds = new TCanvas("c_backgrounds", "Functions", 800, 600);
+  c_backgrounds->Divide(2,2);
+  c_backgrounds->cd(1);
+  pdf_bkg_1->Draw("PL");  pdf_bkg_1->SetLineColor(kRed);
+  c_backgrounds->cd(2);
+  pdf_bkg_2->Draw("PL");  pdf_bkg_2->SetLineColor(kBlue);
+  c_backgrounds->cd(3);
+  pdf_bkg_3->Draw("PL");  pdf_bkg_3->SetLineColor(kGreen+2);
+  c_backgrounds->cd(4);
+  pdf_bkg_1->Draw("PL");       pdf_bkg_1->SetLineColor(kRed);
+  pdf_bkg_2->Draw("PL same");  pdf_bkg_2->SetLineColor(kBlue);
+  pdf_bkg_3->Draw("PL same");  pdf_bkg_3->SetLineColor(kGreen+2);
+
+
 
   TCanvas *c_final = new TCanvas("c_final", "Bias plots", 800, 600);
   c_final->Divide(sqrt(maxContamination)+1, sqrt(maxContamination)+1);
@@ -39,7 +59,10 @@ void DrawBiasVsContaminationCoverage() {
 
     h_bias -> Reset("ICESM");
 
-    TString bkgnamefunction = Form("exp(-x/80.) + 0.5 * %.2f * 2", 1. * iContamination / maxContamination);
+    // TString bkgnamefunction = Form("exp(-x/80.) + 0.5 * %.2f * 2", 1. * iContamination / maxContamination);
+    // TString bkgnamefunction = Form("exp(-x/80.) + 0.5 * %.2f * exp(-x/120.)", 1. * iContamination / maxContamination);
+    // TString bkgnamefunction = Form("exp(-x/80.) + 0.5 * 4 * %.2f * exp(-5*x/80.)", 1. * iContamination / maxContamination);
+    TString bkgnamefunction = Form("exp(-x/80.) + 5 * %.2f * exp(-5*x/195.)", 1. * iContamination / maxContamination);
     // TString bkgnamefunction = Form("exp(-x/80.) + 0.5 * %.2f * exp(-3*x/80.)", 1. * iContamination / maxContamination);
     // TString bkgnamefunction = Form("exp(-x/80.) + 0.5 * %.2f * exp(-10*x/80.)", 1. * iContamination / maxContamination);
 
