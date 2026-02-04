@@ -16,11 +16,11 @@ void matrix() {
 
   TRandom3 *rng = new TRandom3(42);
 
-  TH1F *h1_gen = new TH1F("h1_gen", "Exponential Distribution", 10, 0, 1000);
-  TH1F *h2_gen = new TH1F("h2_gen", "Exponential Distribution", 10, 0, 1000);
+  TH1F *h1_gen = new TH1F("h1_gen", "gen 1", 10, 0, 1000);
+  TH1F *h2_gen = new TH1F("h2_gen", "gen 2", 10, 0, 1000);
 
-  TH1F *h1_reco = new TH1F("h1_reco", "Exponential Distribution", 10, 0, 1000);
-  TH1F *h2_reco = new TH1F("h2_reco", "Exponential Distribution", 10, 0, 1000);
+  TH1F *h1_reco = new TH1F("h1_reco", "reco 1", 10, 0, 1000);
+  TH1F *h2_reco = new TH1F("h2_reco", "reco 2", 10, 0, 1000);
 
   TH2F *h1_response = new TH2F("h1_response", "response 1", 10, 0, 1000,  10, 0, 1000);
   TH2F *h2_response = new TH2F("h2_response", "response 2", 10, 0, 1000,  10, 0, 1000);
@@ -71,6 +71,8 @@ void matrix() {
   h1_gen->Draw();
   h2_gen->Draw("same");
 
+  c1gen->BuildLegend(0.6, 0.7, 0.85, 0.85);
+
 
   TCanvas *c1reco = new TCanvas("c1reco", "reco mjj", 800, 600);
 
@@ -86,8 +88,10 @@ void matrix() {
   h1_reco->Draw();
   h2_reco->Draw("same");
 
+  c1reco->BuildLegend(0.6, 0.7, 0.85, 0.85);
 
-  TCanvas *c1response = new TCanvas("c1response", "response mjj", 800, 600);
+
+  TCanvas *c1response = new TCanvas("c1response", "response mjj", 800, 300);
 
   c1response->Divide(2,1);
 
