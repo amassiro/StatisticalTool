@@ -67,3 +67,18 @@ Plot:
 Result:
 
 ![chi2](c1.png)
+
+
+
+
+
+
+GoF and chi2
+====
+
+Study the expected distribution for a given histogram
+
+    r99t simulate.cxx
+
+
+
