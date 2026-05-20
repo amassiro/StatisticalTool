@@ -10,7 +10,8 @@ bin              bin0      bin0      bin0     bin0     bin0
 process          Signal0   Signal1   Signal2  Signal3  Background
 process          0            1         2       3        4
 
-rate             40           0         0       0       10
+# rate             40           0         0       0       10
+rate             80           0         0       0       10
 -------------------------------------------------
 lumi      lnN   1.02         1.02      1.02     1.02    1.02
 only_bkg  lnN     -            -         -        -     1.10

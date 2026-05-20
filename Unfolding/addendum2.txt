@@ -1,0 +1,12 @@
+Fraction_0   rateParam   *   Signal0   0.25   [0,1]
+Fraction_1   rateParam   *   Signal1   0.25   [0,1]
+Fraction_2   rateParam   *   Signal2   0.25   [0,1]
+
+cross_section_r   rateParam   *   Signal*   1.0   [0,5]
+
+Fraction_3   rateParam   *   Signal3   (@0-@1-@2-@3)   cross_section_r,Fraction_0,Fraction_1,Fraction_2
+
+r0_scale     rateParam   *   Signal0   (@0)   Fraction_0
+r1_scale     rateParam   *   Signal1   (@0)   Fraction_1
+r2_scale     rateParam   *   Signal2   (@0)   Fraction_2
+r3_scale     rateParam   *   Signal3   (@0)   Fraction_3

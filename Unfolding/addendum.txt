@@ -1,0 +1,8 @@
+RVV_1 extArg 1.0 [0.0,2.0]
+RVV_2 extArg 1.0 [0.0,2.0]
+RVV_3 extArg 1.0 [0.0,2.0]
+FR0 rateParam * Signal0 (250-40*@0-80*@1-50*@2)/80 RVV_1,RVV_2,RVV_3
+FR1 rateParam * Signal1 @0 RVV_1
+FR2 rateParam * Signal2 @0 RVV_2
+FR3 rateParam * Signal3 @0 RVV_3
+
