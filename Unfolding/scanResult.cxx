@@ -1,6 +1,6 @@
 
 
-void scanRoot () {
+void scanResult () {
 
   TFile* _file0 = TFile::Open("higgsCombineTest.MultiDimFit.mH120.root");
   TFile* _file1 = TFile::Open("higgsCombineTest.MultiDimFit.mH125.root");

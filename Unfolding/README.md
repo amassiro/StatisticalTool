@@ -127,6 +127,7 @@ Normalized:
        --redefineSignalPOIs r_s0,RVV_1,RVV_2,RVV_3 \
        --algo=singles \
        --saveFitResult \
+       --robustHesse=1 \
        --trackParameters FR0 \
        --trackErrors FR0 \
        -m 125
@@ -139,14 +140,6 @@ Normalized:
        --trackParameters FR0 \
        --trackErrors FR0 \
        -m 125
-
-    combine -M MultiDimFit workspace_0123_normalized.root \
-           --redefineSignalPOIs r_s0,RVV_1,RVV_2,RVV_3 \
-           --algo=none \
-           --saveFitResult \
-           --robustHesse=1 \
-           -m 125
-
 
 
     r99t scanRoot.cxx
@@ -163,6 +156,32 @@ New model:
          --redefineSignalPOIs cross_section_r,Fraction_0,Fraction_1,Fraction_2 \
          --trackParameters Fraction_3 \
          -m 130
+
+
+
+    cat  datacard_combined_0123.txt   addendum3.txt  >  datacard_combined_0123_normalized_newmodel.txt
+
+    text2workspace.py -P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+              --PO verbose \
+              --PO 'map=.*/Signal0:r_cross_section[1,0,3]' \
+              --PO 'map=.*/Signal1:r_cross_section[1,0,3]' \
+              --PO 'map=.*/Signal2:r_cross_section[1,0,3]' \
+              --PO 'map=.*/Signal3:r_cross_section[1,0,3]' \
+        datacard_combined_0123_normalized.txt \
+        -o workspace_0123_normalized.root
+
+    combine -M MultiDimFit workspace_0123_newmodel.root \
+         --algo cross \
+         --redefineSignalPOIs r_cross_section,F0,F1,F2 \
+         --trackParameters F3 \
+         -m 140
+
+
+
+
+
+
+
 
 
 
