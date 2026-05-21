@@ -1,11 +1,11 @@
-temp0   extArg 1.0 [0.0,2.0]
-temp1   extArg 1.0 [0.0,2.0]
-temp2   extArg 1.0 [0.0,2.0]
+F0   extArg 1.0 [0.0,2.0]
+F1   extArg 1.0 [0.0,2.0]
+F2   extArg 1.0 [0.0,2.0]
 
-F0     rateParam   *   Signal0   @0   temp0
-F1     rateParam   *   Signal1   @0   temp1
-F2     rateParam   *   Signal2   @0   temp2
-F3     rateParam   *   Signal3   (1-0.2*@1-0.3*@2-0.4*@3)   temp0,temp1,temp2
+temp0     rateParam   *   Signal0   @0   F0
+temp1     rateParam   *   Signal1   @0   F1
+temp2     rateParam   *   Signal2   @0   F2
+F3        rateParam   *   Signal3   (1-0.2*@0-0.3*@1-0.4*@2)/0.1   temp0,temp1,temp2
 
 
 

@@ -167,15 +167,24 @@ New model:
               --PO 'map=.*/Signal1:r_cross_section[1,0,3]' \
               --PO 'map=.*/Signal2:r_cross_section[1,0,3]' \
               --PO 'map=.*/Signal3:r_cross_section[1,0,3]' \
-        datacard_combined_0123_normalized.txt \
-        -o workspace_0123_normalized.root
+        datacard_combined_0123_normalized_newmodel.txt \
+        -o workspace_0123_normalized_newmodel.root
 
-    combine -M MultiDimFit workspace_0123_newmodel.root \
+    combine -M MultiDimFit workspace_0123_normalized_newmodel.root \
          --algo cross \
          --redefineSignalPOIs r_cross_section,F0,F1,F2 \
          --trackParameters F3 \
+         --trackErrors F3 \
          -m 140
 
+    combine -M FitDiagnostics workspace_0123_normalized_newmodel.root \
+       --forceRecreateNLL \
+       --redefineSignalPOIs r_cross_section,F0,F1,F2 \
+       --saveWorkspace \
+       -m 140
+
+
+    r99t scanResult.cxx
 
 
 
