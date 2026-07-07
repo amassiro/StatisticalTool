@@ -66,17 +66,6 @@ void test(){
   std::cout << "C extimated = " << C_extimated << " +/- " << sigmaC_extimated << "    (" << sigmaC_extimated/C_extimated*100 << " %)" << std::endl;
 
 
-
-
-
-
-
-
-
-
-
-
-
 }
 
 
