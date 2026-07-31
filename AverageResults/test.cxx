@@ -25,7 +25,7 @@ void test(){
   //
   float lumi = 10000;
 
-  float background_uncertainty = 0.09; // relative uncertainty
+  float background_uncertainty = 0.10; // relative uncertainty
 
   // signal A
   float SigA = 7543;
