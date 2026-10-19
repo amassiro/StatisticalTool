@@ -53,6 +53,15 @@ Example, test input, C_true = 0, 5000 toys per test:
     -2DlnL = 3.84 sx : C_test = -0.781 , fraction t < 3.84 = 95.5 +/- 0.3 % (Wilks 95 %)
     -2DlnL = 3.84 dx : C_test =  0.551 , fraction t < 3.84 = 95.5 +/- 0.3 %
 
+Asimov scan at C_true = 0: the 4 crossings (dashed) are the C where the toys are generated:
+
+![coverageComplete Asimov scan](images/coverageComplete_asimov.png)
+
+t from the toys at the 4 crossings (blue), chi2 1 dof (red, Wilks), t_Asimov (green, = 1 or 3.84 by construction),
+upper 32% (5%) of the toys shaded: if Wilks holds the shaded area starts at t_Asimov:
+
+![coverageComplete t](images/coverageComplete_t.png)
+
 Run, one test only, -2DlnL = 1, left or right, coverage.cxx(..., C_true, n_toys, c_min, c_max, side):
 
     root -l coverage.cxx
@@ -61,6 +70,21 @@ Run, one test only, -2DlnL = 1, left or right, coverage.cxx(..., C_true, n_toys,
 
 Output: t from toys vs chi2 1 dof, upper 32% shaded (coverage.png), Asimov scan (coverage_asimov.png),
 likelihood scan of the first 10 toys (coverage_toy_scan.png).
+
+Example, test input, C_true = 0, 10000 toys, sx: C_toys = -0.349 , fraction t < 1 = 67.2 +/- 0.5 % (Wilks 68.27 %).
+
+Asimov scan at C_true = 0, toys generated at C_toys (green, -2DlnL = 1 crossing on the left):
+
+![coverage Asimov scan](images/coverage_asimov.png)
+
+t from the toys at C_toys (blue), chi2 1 dof (red), t_Asimov = 1 (green), upper 32% of the toys shaded:
+
+![coverage t](images/coverage.png)
+
+Likelihood scan of the first 10 toys, color = t = -2DlnL(C_toys) of the toy (light blue/blue small t, yellow/red large t),
+C_toys in green. Some toys have a second minimum, or the minimum at the boundary of [c_min, c_max]:
+
+![coverage toy scans](images/coverage_toy_scan.png)
 
 Run, measurement of the interval edges with toys (Neyman), left (sx) and right (dx), coverageMeasurement.cxx(..., C_true, n_toys, c_min, c_max):
 
@@ -85,4 +109,14 @@ Example, test input, C_true = 0, 20000 toys per point:
     95%    CL sx : Asimov C = -0.781 , toys C = -0.767 +/- 0.006
     95%    CL dx : Asimov C =  0.551 , toys C =  0.546 +/- 0.003
 
-NB: root and png files are not in the repository, regenerate them with the commands above.
+Asimov scan at C_true = 0: Asimov crossings (Wilks, dashed) and edges measured with the toys (solid),
+68.27% CL magenta, 95% CL orange:
+
+![coverageMeasurement Asimov scan](images/coverageMeasurement_asimov.png)
+
+t from the toys at the 4 measured C: by construction the upper 31.73% (5%) of the toys starts at t_Asimov (green):
+
+![coverageMeasurement t](images/coverageMeasurement_t.png)
+
+NB: root files are not in the repository, regenerate them with the commands above.
+The plots in images/ are copies of the png produced by the commands of the examples.
