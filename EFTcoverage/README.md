@@ -35,6 +35,21 @@ Create test input (input.root with histo_SM, histo_cP1, histo_cM1):
 
     root -l -b -q createTestInput.cxx
 
+Test input with a global and a local minimum in the Asimov scan (C_true = 0: global minimum at C = 0,
+local minimum -2DlnL ~ 2.9 at C ~ -1.16, barrier -2DlnL ~ 7.9 at C ~ -0.63):
+
+    root -l -b -q 'createTestInput.cxx("input_2minima.root", 1)'
+
+Tests with the two minima input (same macros, see below):
+
+    root -l 'coverage.cxx("input_2minima.root", "histo_SM", "histo_cP1", "histo_cM1", 0., 10000, -2, 2, "sx")'
+    root -l 'coverage.cxx("input_2minima.root", "histo_SM", "histo_cP1", "histo_cM1", 0., 10000, -2, 2, "dx")'
+    root -l 'coverageComplete.cxx("input_2minima.root", "histo_SM", "histo_cP1", "histo_cM1", 0., 5000)'
+    root -l 'coverageMeasurement.cxx("input_2minima.root", "histo_SM", "histo_cP1", "histo_cM1", 0., 20000, -2, 2)'
+
+NB: with input_2minima.root the 95% CL Asimov interval has 4 crossings (2 disjoint intervals);
+the macros test only the outermost crossings (min and max C).
+
 Run, all the 4 tests, -2DlnL = 1 sx and dx, -2DlnL = 3.84 sx and dx, coverageComplete.cxx(..., C_true, n_toys, c_min, c_max):
 
     root -l coverageComplete.cxx

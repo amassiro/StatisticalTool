@@ -75,6 +75,42 @@ void coverage(TString name_file = "input.root",
   };
 
 
+  //---- plot: input histograms, SM, C=+1, C=-1
+
+  TCanvas* cc_inputs = new TCanvas ("cc_inputs", "inputs", 800, 600);
+  cc_inputs->SetLogy();
+
+  TH1* h_SM_draw  = (TH1*) h_SM ->Clone ("h_SM_draw");
+  TH1* h_cP1_draw = (TH1*) h_cP1->Clone ("h_cP1_draw");
+  TH1* h_cM1_draw = (TH1*) h_cM1->Clone ("h_cM1_draw");
+  h_SM_draw ->SetLineColor(kBlack);
+  h_cP1_draw->SetLineColor(kRed);
+  h_cM1_draw->SetLineColor(kBlue);
+  h_SM_draw ->SetLineWidth(3);
+  h_cP1_draw->SetLineWidth(2);
+  h_cM1_draw->SetLineWidth(2);
+
+  double max_inputs = std::max (h_SM_draw->GetMaximum(), std::max (h_cP1_draw->GetMaximum(), h_cM1_draw->GetMaximum()));
+  double min_inputs = std::min (h_SM_draw->GetMinimum(), std::min (h_cP1_draw->GetMinimum(), h_cM1_draw->GetMinimum()));
+  h_SM_draw->SetMaximum (2. * max_inputs);
+  h_SM_draw->SetMinimum (0.5 * min_inputs);
+  h_SM_draw->SetTitle ("input");
+  h_SM_draw->GetYaxis()->SetTitle("events");
+  h_SM_draw ->Draw("histo");
+  h_cP1_draw->Draw("histo same");
+  h_cM1_draw->Draw("histo same");
+
+  TLegend* leg_inputs = new TLegend (0.70, 0.70, 0.88, 0.88);
+  leg_inputs->AddEntry(h_SM_draw,  "SM",   "l");
+  leg_inputs->AddEntry(h_cP1_draw, "C=+1", "l");
+  leg_inputs->AddEntry(h_cM1_draw, "C=-1", "l");
+  leg_inputs->Draw();
+
+  cc_inputs->SaveAs("coverage_inputs.png");
+
+
+
+
   //---- -2lnL, as likelihood ratio to the saturated model (as in FCCee-EFT likelihood.cxx)
   //
   //    Pois(n|mu) / Pois(n|n) = (mu/n)^n * exp(-(mu-n))       --> the n! cancels
@@ -163,6 +199,114 @@ void coverage(TString name_file = "input.root",
     if (v_crossings[iCL].size() == 0) std::cout << "  none in [" << c_min << ", " << c_max << "] --> enlarge the range";
     std::cout << std::endl;
   }
+
+
+  //---- plot: N(C) = SM + C * L + C^2 * Q, C in the 95% CL range of the Asimov scan (-2DlnL < 3.84, ~2 sigma)
+  //     C < 0 blue, C > 0 red, darker for larger |C|
+
+  double c_draw_min = c_min;
+  double c_draw_max = c_max;
+  if (v_crossings[1].size() > 0) {
+    c_draw_min = *std::min_element (v_crossings[1].begin(), v_crossings[1].end());
+    c_draw_max = *std::max_element (v_crossings[1].begin(), v_crossings[1].end());
+  }
+  int n_c_draw = 16;
+  double c_draw_abs_max = std::max (fabs (c_draw_min), fabs (c_draw_max));
+
+  std::vector<double> v_c_draw;
+  for (int iC = 0; iC < n_c_draw; iC++) {
+    double c = c_draw_min + (c_draw_max - c_draw_min) * iC / (n_c_draw - 1);
+    if (fabs (c) < 1.e-6) continue;   // = SM
+    v_c_draw.push_back (c);
+  }
+
+  TCanvas* cc_inputs_c = new TCanvas ("cc_inputs_c", "inputs vs C", 800, 800);
+
+  //---- top pad: N(C), bottom pad: N(C) / SM
+  TPad* pad_top    = new TPad ("pad_top",    "", 0., 0.30, 1., 1.);
+  TPad* pad_bottom = new TPad ("pad_bottom", "", 0., 0.00, 1., 0.30);
+  pad_top->SetBottomMargin(0.02);
+  pad_bottom->SetTopMargin(0.02);
+  pad_bottom->SetBottomMargin(0.30);
+  pad_top->Draw();
+  pad_bottom->Draw();
+
+  pad_top->cd();
+  pad_top->SetLogy();
+
+  std::vector<TH1*> v_h_c_draw;
+  double max_inputs_c = h_SM->GetMaximum();
+  double min_inputs_c = h_SM->GetMinimum();
+  for (int iC = 0; iC < v_c_draw.size(); iC++) {
+    TH1* h_c = (TH1*) h_SM->Clone (Form("h_c_draw_%d", iC));
+    for (int iBin = 0; iBin < n_bins; iBin++) {
+      h_c->SetBinContent (iBin+1, expected (iBin, v_c_draw[iC]));
+    }
+    double x = fabs (v_c_draw[iC]) / c_draw_abs_max;   // 0 ... 1
+    int color = (v_c_draw[iC] < 0) ? TColor::GetColor ((float) (0.60 * (1. - x)), (float) (0.80 - 0.70 * x), (float) (1.00 - 0.40 * x))
+                                   : TColor::GetColor ((float) (1.00 - 0.40 * x), (float) (0.75 * (1. - x)), (float) (0.65 * (1. - x)));
+    h_c->SetLineColor(color);
+    h_c->SetLineWidth(2);
+    max_inputs_c = std::max (max_inputs_c, h_c->GetMaximum());
+    min_inputs_c = std::min (min_inputs_c, h_c->GetMinimum());
+    v_h_c_draw.push_back (h_c);
+  }
+
+  TH1* h_SM_draw_c = (TH1*) h_SM->Clone ("h_SM_draw_c");
+  h_SM_draw_c->SetLineColor(kBlack);
+  h_SM_draw_c->SetLineWidth(3);
+  h_SM_draw_c->SetMaximum (3. * max_inputs_c);
+  h_SM_draw_c->SetMinimum (0.5 * min_inputs_c);
+  h_SM_draw_c->SetTitle (Form("N(C) = SM + C L + C^{2} Q , C in [%.2f, %.2f] (Asimov -2#DeltalnL < 3.84)", c_draw_min, c_draw_max));
+  h_SM_draw_c->GetYaxis()->SetTitle("events");
+  h_SM_draw_c->GetXaxis()->SetLabelSize(0);
+  h_SM_draw_c->Draw("histo");
+  for (auto h_c : v_h_c_draw) h_c->Draw("histo same");
+  h_SM_draw_c->Draw("histo same");
+
+  TLegend* leg_inputs_c = new TLegend (0.55, 0.55, 0.88, 0.88);
+  leg_inputs_c->SetNColumns(2);
+  leg_inputs_c->AddEntry(h_SM_draw_c, "SM (C=0)", "l");
+  for (int iC = 0; iC < v_c_draw.size(); iC++) {
+    leg_inputs_c->AddEntry(v_h_c_draw[iC], Form("C = %+.3f", v_c_draw[iC]), "l");
+  }
+  leg_inputs_c->Draw();
+
+  //---- ratio N(C) / SM
+  pad_bottom->cd();
+  pad_bottom->SetGridy();
+
+  std::vector<TH1*> v_h_ratio;
+  double max_ratio = 1.;
+  double min_ratio = 1.;
+  for (int iC = 0; iC < v_h_c_draw.size(); iC++) {
+    TH1* h_ratio = (TH1*) v_h_c_draw[iC]->Clone (Form("h_ratio_%d", iC));
+    h_ratio->Divide (h_SM);
+    max_ratio = std::max (max_ratio, h_ratio->GetMaximum());
+    min_ratio = std::min (min_ratio, h_ratio->GetMinimum());
+    v_h_ratio.push_back (h_ratio);
+  }
+
+  TH1* h_ratio_SM = (TH1*) h_SM->Clone ("h_ratio_SM");
+  h_ratio_SM->Divide (h_SM);
+  h_ratio_SM->SetLineColor(kBlack);
+  h_ratio_SM->SetLineWidth(3);
+  double margin_ratio = 0.1 * (max_ratio - min_ratio);
+  h_ratio_SM->SetMaximum (max_ratio + margin_ratio);
+  h_ratio_SM->SetMinimum (min_ratio - margin_ratio);
+  h_ratio_SM->SetTitle ("");
+  h_ratio_SM->GetYaxis()->SetTitle("N(C) / SM");
+  h_ratio_SM->GetYaxis()->SetNdivisions(505);
+  h_ratio_SM->GetYaxis()->SetTitleSize(0.10);
+  h_ratio_SM->GetYaxis()->SetTitleOffset(0.45);
+  h_ratio_SM->GetYaxis()->SetLabelSize(0.09);
+  h_ratio_SM->GetXaxis()->SetLabelSize(0.10);
+  h_ratio_SM->GetXaxis()->SetTitleSize(0.10);
+  h_ratio_SM->Draw("histo");
+  for (auto h_ratio : v_h_ratio) h_ratio->Draw("histo same");
+  h_ratio_SM->Draw("histo same");
+
+  cc_inputs_c->SaveAs("coverage_inputs_c.png");
 
 
   //---- 2) C_toys = crossing at -2DlnL = 1, left (sx) or right (dx)
