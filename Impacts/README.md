@@ -172,3 +172,30 @@ Test without combine (fake json), results in output/ (not in git):
     cd output
     python ../makeFakeImpacts.py
     python ../plotImpactsObsExp.py -i impacts_data.json -e impacts_asimov.json -t ../translate.json -o test_impacts
+
+
+
+Improved Impact
+====
+
+Impact plot with data and Asimov overlaid, as in CMS papers.
+Example, full chain:
+
+    text2workspace.py datacard.txt -m 125 -o ws.root
+
+    # data
+    combineTool.py -M Impacts -d ws.root -m 125 --robustFit 1 --doInitialFit -n .data
+    combineTool.py -M Impacts -d ws.root -m 125 --robustFit 1 --doFits --parallel 8 -n .data
+    combineTool.py -M Impacts -d ws.root -m 125 -o impacts_data.json -n .data
+
+    # MC-Asimov (for data-Asimov add --toysFrequentist)
+    combineTool.py -M Impacts -d ws.root -m 125 --robustFit 1 -t -1 --expectSignal 1 --doInitialFit -n .asimov
+    combineTool.py -M Impacts -d ws.root -m 125 --robustFit 1 -t -1 --expectSignal 1 --doFits --parallel 8 -n .asimov
+    combineTool.py -M Impacts -d ws.root -m 125 -t -1 --expectSignal 1 -o impacts_asimov.json -n .asimov
+
+    # plot, results in output/
+    mkdir -p output
+    python plotImpactsObsExp.py -i impacts_data.json -e impacts_asimov.json -t translate.json -o output/impacts
+    python plotImpactsObsExp.py -i impacts_data.json -e impacts_asimov.json -t translate.json -o output/impacts_dataAsimov --expLabel "data Asimov" -n 30 -c Preliminary
+    python plotImpactsObsExp.py -e impacts_asimov.json -t translate.json -o output/impacts_expOnly --expLabel "MC Asimov"
+
