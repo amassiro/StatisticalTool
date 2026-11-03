@@ -13,6 +13,7 @@
 from __future__ import print_function
 
 import json
+import re
 import math
 import argparse
 import ROOT
@@ -42,6 +43,9 @@ parser.add_argument("-p", "--POI",       default=None, help="POI to draw (defaul
 parser.add_argument("-n", "--per-page",  type=int, default=20, help="number of parameters to show per page")
 parser.add_argument("-m", "--max-pages", type=int, default=None, help="maximum number of pages to write")
 parser.add_argument("-s", "--sortBy",    default="obs", choices=["obs", "exp"], help="sort parameters by obs or exp impact")
+parser.add_argument("--showOnly",        default=None, choices=["constrained", "unconstrained", "mcstat"],
+                    help="show only: constrained nuisances (MC stat excluded), unconstrained parameters (e.g. rateParam), MC stat nuisances (autoMCStats); default all")
+parser.add_argument("--mcStatPattern",   default="^prop_bin.*_bin[0-9]+", help="regular expression for the MC stat nuisances (autoMCStats)")
 parser.add_argument("-x", "--pullRange", type=float, default=2.7, help="x range of the pull panel")
 parser.add_argument("-r", "--impactRange", type=float, default=None, help="x range of the impact panel (default: automatic)")
 parser.add_argument("-l", "--poiLabel",  default="#hat{r}", help="label of the POI")
@@ -52,6 +56,7 @@ parser.add_argument("-b", "--blind",     action="store_true", help="do not print
 parser.add_argument("--labelSize",       type=int, default=16, help="text size of the parameter names, in pixels")
 parser.add_argument("--width",           type=int, default=650, help="canvas width")
 parser.add_argument("--rowHeight",       type=int, default=25, help="height of one row in pixels")
+parser.add_argument("--minHeight",       type=int, default=450, help="minimum canvas height in pixels (few parameters)")
 args = parser.parse_args()
 
 if args.obs is None and args.exp is None:
@@ -150,6 +155,25 @@ def sortKey(name):
     return main[name]["impact"]
   return other[name]["impact"]
 
+#
+# selection of the parameters to show (--showOnly), three disjoint categories:
+#   mcstat        = names matching --mcStatPattern (autoMCStats: prop_bin<channel>_bin<N>[_<process>])
+#   unconstrained = type "Unconstrained" in the json (e.g. rateParam)
+#   constrained   = all the others
+#
+def category(name):
+  if re.search(args.mcStatPattern, name):
+    return "mcstat"
+  dd = main if name in main else other
+  return "constrained" if dd[name]["constrained"] else "unconstrained"
+
+if args.showOnly is not None:
+  names = [name for name in names if category(name) == args.showOnly]
+  print ("show only", args.showOnly, ":", len(names), "parameters")
+  if len(names) == 0:
+    print ("Nothing to plot")
+    exit(0)
+
 names.sort(key=sortKey, reverse=True)
 
 print ("POI = ", poi, " sorted by", "obs" if main is obs else "exp", "impact")
@@ -191,7 +215,7 @@ x_right_end   = 0.97   # impact panel goes from x_pull_end to x_right_end
 
 # same canvas size for all the pages, rows on the last page are taller (as in the original)
 max_rows = max([sum(rowHeights(page_names)) for page_names in pages])
-height = int(max_rows * args.rowHeight / (1. - top_margin - bottom_margin))
+height = max(args.minHeight, int(max_rows * args.rowHeight / (1. - top_margin - bottom_margin)))
 
 # text sizes are relative to the smallest pad dimension: convert pull pad sizes to canvas ones
 size_pull_to_canvas = min(x_pull_end * args.width, height) / float(min(args.width, height))

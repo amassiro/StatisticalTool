@@ -159,6 +159,13 @@ Where:
     -n              number of parameters per page (--per-page, default 20)
     -m              maximum number of pages (--max-pages, default all)
     -s              sort by obs or exp impact (--sortBy obs/exp, default obs)
+    --showOnly      show only one category of parameters (default: all):
+                      constrained     constrained nuisances, MC stat excluded
+                      unconstrained   unconstrained parameters, e.g. rateParam ("type": "Unconstrained" in the json)
+                      mcstat          MC stat nuisances from autoMCStats, prop_bin<channel>_bin<N>
+    --mcStatPattern regular expression to identify the MC stat nuisances (default "^prop_bin.*_bin[0-9]+")
+    --labelSize     size of the parameter names in pixels (default 16)
+    --minHeight     minimum canvas height in pixels, for few parameters (default 450)
     -p              POI (default: first in the json)
     -b              do not print the observed best fit value
     --expLabel      legend label of the expected, e.g. "MC Asimov", "data Asimov"
@@ -211,4 +218,9 @@ Example, full chain:
     python plotImpacts.py -i impacts_data.json -e impacts_asimov.json -t translate.json -o output/impacts_top16 -n 16 -m 1 -s exp
     python plotImpacts.py -i impacts_data.json -e impacts_asimov.json -t translate.json -o output/impacts_dataAsimov --expLabel "data Asimov" -n 30 -c Preliminary
     python plotImpacts.py -e impacts_asimov.json -t translate.json -o output/impacts_expOnly --expLabel "MC Asimov"
+
+    # one category of parameters at a time
+    python plotImpacts.py -i impacts_data.json -e impacts_asimov.json -t translate.json -o output/impacts_constrained   --showOnly constrained
+    python plotImpacts.py -i impacts_data.json -e impacts_asimov.json -t translate.json -o output/impacts_unconstrained --showOnly unconstrained
+    python plotImpacts.py -i impacts_data.json -e impacts_asimov.json -t translate.json -o output/impacts_mcstat        --showOnly mcstat
 

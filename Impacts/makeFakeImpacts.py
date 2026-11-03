@@ -7,7 +7,7 @@ import json, random
 random.seed(3)
 names = ["CMS_btag_HF_corr", "FSR", "WjetsBC_norm", "CMS_pileup", "CMS_JES_RelHF", "CMS_JES_RelPt_2022",
          "QCDscale_muF_tch", "lumi_2022_2023", "CMS_btag_HF_uncorr_2022", "MEPS_tch", "CMS_UE_2022",
-         "CMS_eff_e_trig", "CMS_JES_PileUpPtBB", "CMS_eff_m_trig", "CMS_UE_2023", "prop_binch1_bin11"] + \
+         "CMS_eff_e_trig", "CMS_JES_PileUpPtBB", "CMS_eff_m_trig", "CMS_UE_2023", "prop_binch1_bin11", "prop_binch1_bin3", "prop_binch2_bin7"] + \
         ["minor_%d" % i for i in range(10)]
 
 def make(asimov):
