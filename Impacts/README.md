@@ -156,7 +156,9 @@ Where:
     -i              observed json (black points, coloured lines)
     -e              expected json (grey band, coloured boxes)
     -t              json {"nuisance_name": "label"} for the parameter names (TLatex)
-    -n              number of parameters shown, sorted by impact (--sortBy obs/exp)
+    -n              number of parameters per page (--per-page, default 30)
+    -m              maximum number of pages (--max-pages, default all)
+    -s              sort by obs or exp impact (--sortBy obs/exp, default obs)
     -p              POI (default: first in the json)
     -b              do not print the observed best fit value
     --expLabel      legend label of the expected, e.g. "MC Asimov", "data Asimov"
@@ -165,6 +167,8 @@ NB: pull definition as default in combine plotImpacts.py: (theta_fit - theta_0)/
 NB: impacts are signed: Delta r when the nuisance is moved to theta_fit +1 sigma (red) and -1 sigma (blue).
 NB: the -n names (.data, .asimov) keep the two sets of fits separated in the same folder.
 NB: the local plotImpacts.py works with python2 and python3.
+NB: as in the original, all the pages in one pdf (impacts.pdf), plus one png/root per page (impacts_pageN.png),
+    rank of each parameter written on the left.
 NB: unconstrained parameters (e.g. rateParam) have no pull: the fitted value is written instead,
     observed on the upper line and expected on the lower one (double height row), as taken from the two json.
     PDG rounding from combine if available, otherwise 2 significant digits on the uncertainty.
@@ -200,6 +204,7 @@ Example, full chain:
     # plot, results in output/
     mkdir -p output
     python plotImpacts.py -i impacts_data.json -e impacts_asimov.json -t translate.json -o output/impacts
+    python plotImpacts.py -i impacts_data.json -e impacts_asimov.json -t translate.json -o output/impacts_top16 -n 16 -m 1 -s exp
     python plotImpacts.py -i impacts_data.json -e impacts_asimov.json -t translate.json -o output/impacts_dataAsimov --expLabel "data Asimov" -n 30 -c Preliminary
     python plotImpacts.py -e impacts_asimov.json -t translate.json -o output/impacts_expOnly --expLabel "MC Asimov"
 

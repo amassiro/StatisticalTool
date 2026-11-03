@@ -39,7 +39,8 @@ parser.add_argument("-e", "--exp",       default=None, help="json with expected 
 parser.add_argument("-o", "--output",    default="impacts", help="output name (without extension)")
 parser.add_argument("-t", "--translate", default=None, help="json file to rename parameters, {name: label}")
 parser.add_argument("-p", "--POI",       default=None, help="POI to draw (default: first one)")
-parser.add_argument("-n", "--nmax",      type=int, default=16, help="number of parameters to show")
+parser.add_argument("-n", "--per-page",  type=int, default=30, help="number of parameters to show per page")
+parser.add_argument("-m", "--max-pages", type=int, default=None, help="maximum number of pages to write")
 parser.add_argument("-s", "--sortBy",    default="obs", choices=["obs", "exp"], help="sort parameters by obs or exp impact")
 parser.add_argument("-x", "--pullRange", type=float, default=2.7, help="x range of the pull panel")
 parser.add_argument("-r", "--impactRange", type=float, default=None, help="x range of the impact panel (default: automatic)")
@@ -150,32 +151,34 @@ def sortKey(name):
   return other[name]["impact"]
 
 names.sort(key=sortKey, reverse=True)
-names = names[:args.nmax]
-nparams = len(names)
 
-print ("POI = ", poi)
-for name in names:
-  print ("  {:40s} obs = {:10s} exp = {:10s}".format(
-    name,
+print ("POI = ", poi, " sorted by", "obs" if main is obs else "exp", "impact")
+for i, name in enumerate(names):
+  print ("  {:3d} {:40s} obs = {:10s} exp = {:10s}".format(
+    i + 1, name,
     "{:.4f}".format(obs[name]["impact"]) if name in obs else "-",
     "{:.4f}".format(exp[name]["impact"]) if name in exp else "-"))
 
+
 #
-# row geometry: unconstrained parameters with both obs and exp values written
-# need two text lines, they get a double height row
+# pages, as in the original plotImpacts.py: per_page parameters per page,
+# all the pages in a single pdf
 #
+pages = [names[i:i + args.per_page] for i in range(0, len(names), args.per_page)]
+if args.max_pages is not None and args.max_pages > 0:
+  pages = pages[:args.max_pages]
+
 def isUnconstrained(dd, name):
   return name in dd and not dd[name]["constrained"]
 
-row_h = []
-for name in names:
-  nlines = int(isUnconstrained(obs, name)) + int(isUnconstrained(exp, name))
-  row_h.append(2 if nlines == 2 else 1)
-total_h = sum(row_h)
-# first parameter (largest impact) on top
-row_low = [total_h - sum(row_h[:i + 1]) for i in range(nparams)]
-row_center = [row_low[i] + 0.5 * row_h[i] for i in range(nparams)]
-
+# unconstrained parameters with both obs and exp values written need two text lines,
+# they get a double height row
+def rowHeights(page_names):
+  row_h = []
+  for name in page_names:
+    nlines = int(isUnconstrained(obs, name)) + int(isUnconstrained(exp, name))
+    row_h.append(2 if nlines == 2 else 1)
+  return row_h
 
 #
 # canvas layout (NDC on the canvas)
@@ -186,312 +189,357 @@ x_label_end   = 0.355  # parameter names are right aligned here
 x_pull_end    = 0.705  # pull panel goes from x_label_end to x_pull_end
 x_right_end   = 0.97   # impact panel goes from x_pull_end to x_right_end
 
-height = int(total_h * args.rowHeight / (1. - top_margin - bottom_margin))
-cc = ROOT.TCanvas("cc", "", args.width, height)
-cc.SetFillColor(0)
+# same canvas size for all the pages, rows on the last page are taller (as in the original)
+max_rows = max([sum(rowHeights(page_names)) for page_names in pages])
+height = int(max_rows * args.rowHeight / (1. - top_margin - bottom_margin))
 
 # text sizes are relative to the smallest pad dimension: convert pull pad sizes to canvas ones
 size_pull_to_canvas = min(x_pull_end * args.width, height) / float(min(args.width, height))
-
-def rowToNDC(y):
-  return bottom_margin + y / float(total_h) * (1. - top_margin - bottom_margin)
 
 shade_color = ROOT.TColor.GetColor("#ebebeb")
 def isShaded(i):
   return i % 2 == 0
 
-# ---- alternating row shading, over labels and both panels
-shading = []
-for i in range(nparams):
-  if not isShaded(i):
-    continue
-  box = ROOT.TBox(0.0, rowToNDC(row_low[i]), x_right_end, rowToNDC(row_low[i] + row_h[i]))
-  box.SetFillColor(shade_color)
-  box.Draw()
-  shading.append(box)
-
-# ---- parameter names
-latex = ROOT.TLatex()
-latex.SetNDC()
-latex.SetTextFont(42)
-latex.SetTextSize(args.labelSize)
-latex.SetTextAlign(32)
-for i, name in enumerate(names):
-  latex.DrawLatex(x_label_end, rowToNDC(row_center[i]), translate.get(name, name))
+color_up   = ROOT.TColor.GetColor("#d62728")
+color_down = ROOT.TColor.GetColor("#1f5fbf")
 
 
 #
-# left panel: pulls
+# draw one page
 #
-pad_pull = ROOT.TPad("pad_pull", "", 0., 0., x_pull_end, 1.)
-pad_pull.SetFillStyle(4000)
-pad_pull.SetFrameFillStyle(4000)
-pad_pull.SetLeftMargin(x_label_end / x_pull_end)
-pad_pull.SetRightMargin(0.)
-pad_pull.SetTopMargin(top_margin)
-pad_pull.SetBottomMargin(bottom_margin)
-pad_pull.SetTicks(1, 0)
-pad_pull.Draw()
-pad_pull.cd()
+def drawPage(names, page, npages, first_rank):
+  nparams = len(names)
+  row_h = rowHeights(names)
+  total_h = sum(row_h)
+  # first parameter (largest impact) on top
+  row_low = [total_h - sum(row_h[:i + 1]) for i in range(nparams)]
+  row_center = [row_low[i] + 0.5 * row_h[i] for i in range(nparams)]
 
-frame_pull = ROOT.TH2F("frame_pull", "", 1, -args.pullRange, args.pullRange, 1, 0, total_h)
-frame_pull.GetYaxis().SetLabelSize(0)
-frame_pull.GetYaxis().SetTickLength(0)
-frame_pull.GetXaxis().SetTitle("(#hat{#theta}-#theta_{0})/#Delta#theta")
-frame_pull.GetXaxis().SetTitleSize(0.045)
-frame_pull.GetXaxis().SetTitleOffset(0.95)
-frame_pull.GetXaxis().CenterTitle()
-frame_pull.GetXaxis().SetLabelSize(0.040)
-frame_pull.GetXaxis().SetNdivisions(505)
-frame_pull.Draw("AXIS")
 
-objects = []
-for xline in [-2, -1, 1, 2]:
-  if abs(xline) >= args.pullRange:
-    continue
-  line = ROOT.TLine(xline, 0, xline, total_h)
-  line.SetLineStyle(3)
-  line.SetLineColor(ROOT.kBlack)
-  line.Draw()
-  objects.append(line)
+  cc = ROOT.TCanvas("cc_" + str(page), "", args.width, height)
+  cc.SetFillColor(0)
 
-gr_pull_obs = ROOT.TGraphAsymmErrors()
-for i, name in enumerate(names):
-  y = row_center[i]
-  if name in exp and exp[name]["constrained"]:
-    ee = exp[name]
-    box = ROOT.TBox(max(ee["pull"] - ee["pull_lo"], -args.pullRange), y - 0.4, min(ee["pull"] + ee["pull_hi"], args.pullRange), y + 0.4)
-    box.SetFillColor(ROOT.TColor.GetColor("#b0b0b0"))
+  def rowToNDC(y):
+    return bottom_margin + y / float(total_h) * (1. - top_margin - bottom_margin)
+
+  # ---- alternating row shading, over labels and both panels
+  shading = []
+  for i in range(nparams):
+    if not isShaded(i):
+      continue
+    box = ROOT.TBox(0.0, rowToNDC(row_low[i]), x_right_end, rowToNDC(row_low[i] + row_h[i]))
+    box.SetFillColor(shade_color)
     box.Draw()
-    objects.append(box)
-  if name in obs and obs[name]["constrained"]:
-    oo = obs[name]
-    ipoint = gr_pull_obs.GetN()
-    gr_pull_obs.SetPoint(ipoint, oo["pull"], y)
-    gr_pull_obs.SetPointError(ipoint, oo["pull_lo"], oo["pull_hi"], 0, 0)
+    shading.append(box)
 
-#
-# unconstrained parameters (e.g. rateParam): no pull, write the fitted value as in
-# the original plotImpacts.py, observed on the upper line and expected on the lower one.
-# Values taken from the "fit" field of each json
-#
-unc_text = ROOT.TLatex()
-unc_text.SetTextFont(42)
-unc_text.SetTextSize(0.034)
-unc_text.SetTextAlign(22)
-for i, name in enumerate(names):
-  y = row_center[i]
-  lines = []
-  for dd, label, color in [(obs, args.obsLabel, ROOT.kBlack), (exp, args.expLabel, ROOT.kGray + 2)]:
-    if name in dd and not dd[name]["constrained"]:
-      fit = dd[name]["fit"]
-      s_nom, s_hi, s_lo = GetRounded(fit[1], fit[2] - fit[1], fit[1] - fit[0])
-      lines.append(("{}^{{#plus{}}}_{{#minus{}}} ({})".format(s_nom, s_hi, s_lo, label), color))
-  if len(lines) == 0:
-    continue
-  # hide the dotted lines behind the text, keeping the row shading
-  box = ROOT.TBox(-args.pullRange, row_low[i] + 0.02, args.pullRange, row_low[i] + row_h[i] - 0.02)
-  box.SetFillColor(shade_color if isShaded(i) else ROOT.kWhite)
-  box.Draw()
-  objects.append(box)
-  dy = [0.] if len(lines) == 1 else [+0.5, -0.5]
-  for (text, color), ddy in zip(lines, dy):
-    unc_text.SetTextColor(color)
-    unc_text.DrawLatex(0., y + ddy, text)
+  # ---- parameter names
+  latex = ROOT.TLatex()
+  latex.SetNDC()
+  latex.SetTextFont(42)
+  latex.SetTextSize(args.labelSize)
+  latex.SetTextAlign(32)
+  for i, name in enumerate(names):
+    latex.DrawLatex(x_label_end, rowToNDC(row_center[i]), translate.get(name, name))
 
-gr_pull_obs.SetMarkerStyle(20)
-gr_pull_obs.SetMarkerSize(0.8)
-gr_pull_obs.SetLineWidth(2)
-ROOT.gStyle.SetEndErrorSize(4)
-if gr_pull_obs.GetN() > 0:
-  gr_pull_obs.Draw("P same")
-
-frame_pull.Draw("AXIS same")
-
-# ---- CMS label, inside the pull panel
-cms = ROOT.TLatex()
-cms.SetNDC()
-cms.SetTextFont(61)
-cms.SetTextSize(0.050)
-cms.SetTextAlign(13)
-x_cms = pad_pull.GetLeftMargin() + 0.03
-y_cms = 1. - top_margin + 0.045
-cms.DrawLatex(x_cms, y_cms, "CMS")
-if args.cmsLabel != "":
-  cms.SetTextFont(52)
-  cms.SetTextSize(0.038)
-  cms.DrawLatex(x_cms + 0.085, y_cms - 0.008, args.cmsLabel)
-
-cc.cd()
+  # ---- rank of the parameter (as in the original)
+  rank = ROOT.TLatex()
+  rank.SetNDC()
+  rank.SetTextFont(42)
+  rank.SetTextSize(0.8 * args.labelSize)
+  rank.SetTextAlign(12)
+  rank.SetTextColor(ROOT.kGray + 2)
+  for i, name in enumerate(names):
+    rank.DrawLatex(0.008, rowToNDC(row_center[i]), str(first_rank + i))
 
 
-#
-# right panel: impacts
-#
-max_impact = 0.
-for name in names:
-  for dd in [obs, exp]:
-    if name in dd:
-      max_impact = max(max_impact, abs(dd[name]["impact_hi"]), abs(dd[name]["impact_lo"]))
-impact_range = args.impactRange if args.impactRange is not None else 1.15 * max_impact
-# the panel is narrow: labels only at 0 and +/- step, with step = largest 1,2,5 x 10^n
-# below 0.75 x range, so that no label is at the edges of the panel
-base = 10 ** math.floor(math.log10(0.75 * impact_range))
-step = base
-for mult in [2, 5]:
-  if mult * base <= 0.75 * impact_range:
-    step = mult * base
+  #
+  # left panel: pulls
+  #
+  pad_pull = ROOT.TPad("pad_pull", "", 0., 0., x_pull_end, 1.)
+  pad_pull.SetFillStyle(4000)
+  pad_pull.SetFrameFillStyle(4000)
+  pad_pull.SetLeftMargin(x_label_end / x_pull_end)
+  pad_pull.SetRightMargin(0.)
+  pad_pull.SetTopMargin(top_margin)
+  pad_pull.SetBottomMargin(bottom_margin)
+  pad_pull.SetTicks(1, 0)
+  pad_pull.Draw()
+  pad_pull.cd()
 
-pad_impact = ROOT.TPad("pad_impact", "", x_pull_end, 0., 1., 1.)
-pad_impact.SetFillStyle(4000)
-pad_impact.SetFrameFillStyle(4000)
-pad_impact.SetLeftMargin(0.)
-pad_impact.SetRightMargin((1. - x_right_end) / (1. - x_pull_end))
-pad_impact.SetTopMargin(top_margin)
-pad_impact.SetBottomMargin(bottom_margin)
-pad_impact.SetTicks(1, 0)
-pad_impact.Draw()
-pad_impact.cd()
+  frame_pull = ROOT.TH2F("frame_pull_" + str(page), "", 1, -args.pullRange, args.pullRange, 1, 0, total_h)
+  frame_pull.GetYaxis().SetLabelSize(0)
+  frame_pull.GetYaxis().SetTickLength(0)
+  frame_pull.GetXaxis().SetTitle("(#hat{#theta}-#theta_{0})/#Delta#theta")
+  frame_pull.GetXaxis().SetTitleSize(0.045)
+  frame_pull.GetXaxis().SetTitleOffset(0.95)
+  frame_pull.GetXaxis().CenterTitle()
+  frame_pull.GetXaxis().SetLabelSize(0.040)
+  frame_pull.GetXaxis().SetNdivisions(505)
+  frame_pull.Draw("AXIS")
 
-frame_impact = ROOT.TH2F("frame_impact", "", 1, -impact_range, impact_range, 1, 0, total_h)
-frame_impact.GetYaxis().SetLabelSize(0)
-frame_impact.GetYaxis().SetTickLength(0)
-# axis title drawn on the canvas later (the pad is too narrow)
-frame_impact.GetXaxis().SetLabelSize(0)
-frame_impact.GetXaxis().SetTickLength(0)
-frame_impact.Draw("AXIS")
-
-# dotted vertical lines at the major ticks, solid one at 0
-xline = step
-while xline < impact_range:
-  for xx in [-xline, xline]:
-    line = ROOT.TLine(xx, 0, xx, total_h)
+  objects = []
+  for xline in [-2, -1, 1, 2]:
+    if abs(xline) >= args.pullRange:
+      continue
+    line = ROOT.TLine(xline, 0, xline, total_h)
     line.SetLineStyle(3)
     line.SetLineColor(ROOT.kBlack)
     line.Draw()
     objects.append(line)
-  xline += step
 
-line0 = ROOT.TLine(0, 0, 0, total_h)
-line0.SetLineColor(ROOT.kBlack)
-line0.SetLineWidth(2)
-
-color_up   = ROOT.TColor.GetColor("#d62728")
-color_down = ROOT.TColor.GetColor("#1f5fbf")
-
-for i, name in enumerate(names):
-  y = row_center[i]
-  # expected: filled boxes, +1 sigma (red) and -1 sigma (blue)
-  if name in exp:
-    ee = exp[name]
-    for value, color in [(ee["impact_hi"], color_up), (ee["impact_lo"], color_down)]:
-      box = ROOT.TBox(0, y - 0.4, value, y + 0.4)
-      box.SetFillColorAlpha(color, 0.45)
-      box.SetLineWidth(0)
+  gr_pull_obs = ROOT.TGraphAsymmErrors()
+  for i, name in enumerate(names):
+    y = row_center[i]
+    if name in exp and exp[name]["constrained"]:
+      ee = exp[name]
+      box = ROOT.TBox(max(ee["pull"] - ee["pull_lo"], -args.pullRange), y - 0.4, min(ee["pull"] + ee["pull_hi"], args.pullRange), y + 0.4)
+      box.SetFillColor(ROOT.TColor.GetColor("#b0b0b0"))
       box.Draw()
       objects.append(box)
-  # observed: lines with end tick, red slightly above, blue slightly below
-  if name in obs:
-    oo = obs[name]
-    for value, color, dy in [(oo["impact_hi"], color_up, +0.08), (oo["impact_lo"], color_down, -0.08)]:
-      line = ROOT.TLine(0, y + dy, value, y + dy)
-      line.SetLineColor(color)
-      line.SetLineWidth(2)
+    if name in obs and obs[name]["constrained"]:
+      oo = obs[name]
+      ipoint = gr_pull_obs.GetN()
+      gr_pull_obs.SetPoint(ipoint, oo["pull"], y)
+      gr_pull_obs.SetPointError(ipoint, oo["pull_lo"], oo["pull_hi"], 0, 0)
+
+  #
+  # unconstrained parameters (e.g. rateParam): no pull, write the fitted value as in
+  # the original plotImpacts.py, observed on the upper line and expected on the lower one.
+  # Values taken from the "fit" field of each json
+  #
+  unc_text = ROOT.TLatex()
+  unc_text.SetTextFont(42)
+  unc_text.SetTextSize(0.034)
+  unc_text.SetTextAlign(22)
+  for i, name in enumerate(names):
+    y = row_center[i]
+    lines = []
+    for dd, label, color in [(obs, args.obsLabel, ROOT.kBlack), (exp, args.expLabel, ROOT.kGray + 2)]:
+      if name in dd and not dd[name]["constrained"]:
+        fit = dd[name]["fit"]
+        s_nom, s_hi, s_lo = GetRounded(fit[1], fit[2] - fit[1], fit[1] - fit[0])
+        lines.append(("{}^{{#plus{}}}_{{#minus{}}} ({})".format(s_nom, s_hi, s_lo, label), color))
+    if len(lines) == 0:
+      continue
+    # hide the dotted lines behind the text, keeping the row shading
+    box = ROOT.TBox(-args.pullRange, row_low[i] + 0.02, args.pullRange, row_low[i] + row_h[i] - 0.02)
+    box.SetFillColor(shade_color if isShaded(i) else ROOT.kWhite)
+    box.Draw()
+    objects.append(box)
+    dy = [0.] if len(lines) == 1 else [+0.5, -0.5]
+    for (text, color), ddy in zip(lines, dy):
+      unc_text.SetTextColor(color)
+      unc_text.DrawLatex(0., y + ddy, text)
+
+  gr_pull_obs.SetMarkerStyle(20)
+  gr_pull_obs.SetMarkerSize(0.8)
+  gr_pull_obs.SetLineWidth(2)
+  ROOT.gStyle.SetEndErrorSize(4)
+  if gr_pull_obs.GetN() > 0:
+    gr_pull_obs.Draw("P same")
+
+  frame_pull.Draw("AXIS same")
+
+  # ---- CMS label, inside the pull panel
+  cms = ROOT.TLatex()
+  cms.SetNDC()
+  cms.SetTextFont(61)
+  cms.SetTextSize(0.050)
+  cms.SetTextAlign(13)
+  x_cms = pad_pull.GetLeftMargin() + 0.03
+  y_cms = 1. - top_margin + 0.045
+  cms.DrawLatex(x_cms, y_cms, "CMS")
+  if args.cmsLabel != "":
+    cms.SetTextFont(52)
+    cms.SetTextSize(0.038)
+    cms.DrawLatex(x_cms + 0.085, y_cms - 0.008, args.cmsLabel)
+
+  cc.cd()
+
+
+  #
+  # right panel: impacts
+  #
+  max_impact = 0.
+  for name in names:
+    for dd in [obs, exp]:
+      if name in dd:
+        max_impact = max(max_impact, abs(dd[name]["impact_hi"]), abs(dd[name]["impact_lo"]))
+  impact_range = args.impactRange if args.impactRange is not None else 1.15 * max_impact
+  # the panel is narrow: labels only at 0 and +/- step, with step = largest 1,2,5 x 10^n
+  # below 0.75 x range, so that no label is at the edges of the panel
+  base = 10 ** math.floor(math.log10(0.75 * impact_range))
+  step = base
+  for mult in [2, 5]:
+    if mult * base <= 0.75 * impact_range:
+      step = mult * base
+
+  pad_impact = ROOT.TPad("pad_impact", "", x_pull_end, 0., 1., 1.)
+  pad_impact.SetFillStyle(4000)
+  pad_impact.SetFrameFillStyle(4000)
+  pad_impact.SetLeftMargin(0.)
+  pad_impact.SetRightMargin((1. - x_right_end) / (1. - x_pull_end))
+  pad_impact.SetTopMargin(top_margin)
+  pad_impact.SetBottomMargin(bottom_margin)
+  pad_impact.SetTicks(1, 0)
+  pad_impact.Draw()
+  pad_impact.cd()
+
+  frame_impact = ROOT.TH2F("frame_impact_" + str(page), "", 1, -impact_range, impact_range, 1, 0, total_h)
+  frame_impact.GetYaxis().SetLabelSize(0)
+  frame_impact.GetYaxis().SetTickLength(0)
+  # axis title drawn on the canvas later (the pad is too narrow)
+  frame_impact.GetXaxis().SetLabelSize(0)
+  frame_impact.GetXaxis().SetTickLength(0)
+  frame_impact.Draw("AXIS")
+
+  # dotted vertical lines at the major ticks, solid one at 0
+  xline = step
+  while xline < impact_range:
+    for xx in [-xline, xline]:
+      line = ROOT.TLine(xx, 0, xx, total_h)
+      line.SetLineStyle(3)
+      line.SetLineColor(ROOT.kBlack)
       line.Draw()
-      tick = ROOT.TLine(value, y + dy - 0.2, value, y + dy + 0.2)
-      tick.SetLineColor(color)
-      tick.SetLineWidth(2)
-      tick.Draw()
       objects.append(line)
-      objects.append(tick)
+    xline += step
 
-line0.Draw()
-frame_impact.Draw("AXIS same")
+  line0 = ROOT.TLine(0, 0, 0, total_h)
+  line0.SetLineColor(ROOT.kBlack)
+  line0.SetLineWidth(2)
 
-# ticks at multiples of step, labels only at 0 and +/- step
-tick_length = 0.015 * total_h / (1. - top_margin - bottom_margin)
-xline = 0.
-while xline < impact_range:
-  for xx in set([-xline, xline]):
-    for y1, y2 in [(0, tick_length), (total_h - tick_length, total_h)]:
-      tick = ROOT.TLine(xx, y1, xx, y2)
-      tick.Draw()
-      objects.append(tick)
-  xline += step
+  for i, name in enumerate(names):
+    y = row_center[i]
+    # expected: filled boxes, +1 sigma (red) and -1 sigma (blue)
+    if name in exp:
+      ee = exp[name]
+      for value, color in [(ee["impact_hi"], color_up), (ee["impact_lo"], color_down)]:
+        box = ROOT.TBox(0, y - 0.4, value, y + 0.4)
+        box.SetFillColorAlpha(color, 0.45)
+        box.SetLineWidth(0)
+        box.Draw()
+        objects.append(box)
+    # observed: lines with end tick, red slightly above, blue slightly below
+    if name in obs:
+      oo = obs[name]
+      for value, color, dy in [(oo["impact_hi"], color_up, +0.08), (oo["impact_lo"], color_down, -0.08)]:
+        line = ROOT.TLine(0, y + dy, value, y + dy)
+        line.SetLineColor(color)
+        line.SetLineWidth(2)
+        line.Draw()
+        tick = ROOT.TLine(value, y + dy - 0.2, value, y + dy + 0.2)
+        tick.SetLineColor(color)
+        tick.SetLineWidth(2)
+        tick.Draw()
+        objects.append(line)
+        objects.append(tick)
 
-cc.cd()
+  line0.Draw()
+  frame_impact.Draw("AXIS same")
+
+  # ticks at multiples of step, labels only at 0 and +/- step
+  tick_length = 0.015 * total_h / (1. - top_margin - bottom_margin)
+  xline = 0.
+  while xline < impact_range:
+    for xx in set([-xline, xline]):
+      for y1, y2 in [(0, tick_length), (total_h - tick_length, total_h)]:
+        tick = ROOT.TLine(xx, y1, xx, y2)
+        tick.Draw()
+        objects.append(tick)
+    xline += step
+
+  cc.cd()
 
 
-#
-# legend and POI value
-#
-leg_size = 0.030
-dummy_obs_pull = ROOT.TGraphAsymmErrors(1)
-dummy_obs_pull.SetMarkerStyle(20)
-dummy_obs_pull.SetMarkerSize(0.8)
-dummy_obs_pull.SetLineWidth(2)
-dummy_exp_pull = ROOT.TH1F("dummy_exp_pull", "", 1, 0, 1)
-dummy_exp_pull.SetFillColor(ROOT.TColor.GetColor("#b0b0b0"))
-dummy_exp_pull.SetLineWidth(0)
+  #
+  # legend and POI value
+  #
+  leg_size = 0.030
+  dummy_obs_pull = ROOT.TGraphAsymmErrors(1)
+  dummy_obs_pull.SetMarkerStyle(20)
+  dummy_obs_pull.SetMarkerSize(0.8)
+  dummy_obs_pull.SetLineWidth(2)
+  dummy_exp_pull = ROOT.TH1F("dummy_exp_pull_" + str(page), "", 1, 0, 1)
+  dummy_exp_pull.SetFillColor(ROOT.TColor.GetColor("#b0b0b0"))
+  dummy_exp_pull.SetLineWidth(0)
 
-dummy_obs_up = ROOT.TH1F("dummy_obs_up", "", 1, 0, 1)
-dummy_obs_up.SetLineColor(color_up)
-dummy_obs_up.SetLineWidth(2)
-dummy_obs_down = ROOT.TH1F("dummy_obs_down", "", 1, 0, 1)
-dummy_obs_down.SetLineColor(color_down)
-dummy_obs_down.SetLineWidth(2)
-dummy_exp_up = ROOT.TH1F("dummy_exp_up", "", 1, 0, 1)
-dummy_exp_up.SetFillColorAlpha(color_up, 0.45)
-dummy_exp_up.SetLineWidth(0)
-dummy_exp_down = ROOT.TH1F("dummy_exp_down", "", 1, 0, 1)
-dummy_exp_down.SetFillColorAlpha(color_down, 0.45)
-dummy_exp_down.SetLineWidth(0)
+  dummy_obs_up = ROOT.TH1F("dummy_obs_up_" + str(page), "", 1, 0, 1)
+  dummy_obs_up.SetLineColor(color_up)
+  dummy_obs_up.SetLineWidth(2)
+  dummy_obs_down = ROOT.TH1F("dummy_obs_down_" + str(page), "", 1, 0, 1)
+  dummy_obs_down.SetLineColor(color_down)
+  dummy_obs_down.SetLineWidth(2)
+  dummy_exp_up = ROOT.TH1F("dummy_exp_up_" + str(page), "", 1, 0, 1)
+  dummy_exp_up.SetFillColorAlpha(color_up, 0.45)
+  dummy_exp_up.SetLineWidth(0)
+  dummy_exp_down = ROOT.TH1F("dummy_exp_down_" + str(page), "", 1, 0, 1)
+  dummy_exp_down.SetFillColorAlpha(color_down, 0.45)
+  dummy_exp_down.SetLineWidth(0)
 
-legend = ROOT.TLegend(0.03, 0.905, 0.97, 0.995)
-legend.SetNColumns(3)
-legend.SetBorderSize(0)
-legend.SetFillStyle(0)
-legend.SetTextFont(42)
-legend.SetTextSize(leg_size)
-if len(obs) > 0:
-  legend.AddEntry(dummy_obs_pull, "Fit constraint (" + args.obsLabel + ")", "lp")
-  legend.AddEntry(dummy_obs_up,   "+1#sigma impact (" + args.obsLabel + ")", "l")
-  legend.AddEntry(dummy_obs_down, "-1#sigma impact (" + args.obsLabel + ")", "l")
-if len(exp) > 0:
-  legend.AddEntry(dummy_exp_pull, "Fit constraint (" + args.expLabel + ")", "f")
-  legend.AddEntry(dummy_exp_up,   "+1#sigma impact (" + args.expLabel + ")", "f")
-  legend.AddEntry(dummy_exp_down, "-1#sigma impact (" + args.expLabel + ")", "f")
-legend.Draw()
+  legend = ROOT.TLegend(0.03, 0.905, 0.97, 0.995)
+  legend.SetNColumns(3)
+  legend.SetBorderSize(0)
+  legend.SetFillStyle(0)
+  legend.SetTextFont(42)
+  legend.SetTextSize(leg_size)
+  if len(obs) > 0:
+    legend.AddEntry(dummy_obs_pull, "Fit constraint (" + args.obsLabel + ")", "lp")
+    legend.AddEntry(dummy_obs_up,   "+1#sigma impact (" + args.obsLabel + ")", "l")
+    legend.AddEntry(dummy_obs_down, "-1#sigma impact (" + args.obsLabel + ")", "l")
+  if len(exp) > 0:
+    legend.AddEntry(dummy_exp_pull, "Fit constraint (" + args.expLabel + ")", "f")
+    legend.AddEntry(dummy_exp_up,   "+1#sigma impact (" + args.expLabel + ")", "f")
+    legend.AddEntry(dummy_exp_down, "-1#sigma impact (" + args.expLabel + ")", "f")
+  legend.Draw()
 
-poi_fit = poi_fit_obs if (poi_fit_obs is not None and not args.blind) else poi_fit_exp
-if poi_fit is not None:
-  poi_text = ROOT.TLatex()
-  poi_text.SetNDC()
-  poi_text.SetTextFont(42)
-  poi_text.SetTextSize(0.042)
-  poi_text.SetTextAlign(31)
-  text = "{} = {:.2f}^{{+{:.2f}}}_{{-{:.2f}}}".format(args.poiLabel, poi_fit[1], poi_fit[2] - poi_fit[1], poi_fit[1] - poi_fit[0])
-  if poi_fit is poi_fit_exp and len(obs) > 0:
-    text += " (" + args.expLabel + ")"
-  poi_text.DrawLatex(x_right_end, 1. - top_margin + 0.02, text)
+  poi_fit = poi_fit_obs if (poi_fit_obs is not None and not args.blind) else poi_fit_exp
+  if poi_fit is not None:
+    poi_text = ROOT.TLatex()
+    poi_text.SetNDC()
+    poi_text.SetTextFont(42)
+    poi_text.SetTextSize(0.042)
+    poi_text.SetTextAlign(31)
+    text = "{} = {:.2f}^{{+{:.2f}}}_{{-{:.2f}}}".format(args.poiLabel, poi_fit[1], poi_fit[2] - poi_fit[1], poi_fit[1] - poi_fit[0])
+    if poi_fit is poi_fit_exp and len(obs) > 0:
+      text += " (" + args.expLabel + ")"
+    poi_text.DrawLatex(x_right_end, 1. - top_margin + 0.02, text)
 
-impact_labels = ROOT.TLatex()
-impact_labels.SetNDC()
-impact_labels.SetTextFont(42)
-impact_labels.SetTextSize(0.040 * size_pull_to_canvas)
-impact_labels.SetTextAlign(23)
-for xx in [-step, 0., step]:
-  x_ndc = x_pull_end + (xx + impact_range) / (2. * impact_range) * (x_right_end - x_pull_end)
-  label = "0" if xx == 0 else ("#minus" if xx < 0 else "") + "{:g}".format(abs(xx))
-  impact_labels.DrawLatex(x_ndc, bottom_margin - 0.012, label)
+  impact_labels = ROOT.TLatex()
+  impact_labels.SetNDC()
+  impact_labels.SetTextFont(42)
+  impact_labels.SetTextSize(0.040 * size_pull_to_canvas)
+  impact_labels.SetTextAlign(23)
+  for xx in [-step, 0., step]:
+    x_ndc = x_pull_end + (xx + impact_range) / (2. * impact_range) * (x_right_end - x_pull_end)
+    label = "0" if xx == 0 else ("#minus" if xx < 0 else "") + "{:g}".format(abs(xx))
+    impact_labels.DrawLatex(x_ndc, bottom_margin - 0.012, label)
 
-impact_title = ROOT.TLatex()
-impact_title.SetNDC()
-impact_title.SetTextFont(42)
-impact_title.SetTextSize(0.045 * size_pull_to_canvas)
-impact_title.SetTextAlign(33)
-impact_title.DrawLatex(x_right_end + 0.02, bottom_margin - 0.045, "#Delta" + args.poiLabel)
+  impact_title = ROOT.TLatex()
+  impact_title.SetNDC()
+  impact_title.SetTextFont(42)
+  impact_title.SetTextSize(0.045 * size_pull_to_canvas)
+  impact_title.SetTextAlign(33)
+  impact_title.DrawLatex(x_right_end + 0.02, bottom_margin - 0.045, "#Delta" + args.poiLabel)
 
-cc.Update()
-for ext in ["pdf", "png", "root"]:
-  cc.SaveAs(args.output + "." + ext)
+  cc.Update()
+
+  # multi-page pdf as in the original, one png per page
+  extra = ""
+  if page == 0:
+    extra = "("
+  if page == npages - 1:
+    extra = ")"
+  if npages == 1:
+    extra = ""
+  cc.Print(args.output + ".pdf" + extra, "pdf")
+  suffix = "" if npages == 1 else "_page" + str(page + 1)
+  cc.SaveAs(args.output + suffix + ".png")
+  cc.SaveAs(args.output + suffix + ".root")
+
+
+npages = len(pages)
+first_rank = 1
+for page, page_names in enumerate(pages):
+  drawPage(page_names, page, npages, first_rank)
+  first_rank += len(page_names)
+print ("written", args.output + ".pdf", "with", npages, "page(s)")
