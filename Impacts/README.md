@@ -115,3 +115,60 @@ Impacts with a different Parameter of Interest (POI)
     
     
     
+
+
+Impact plots, observed and expected overlaid
+====
+
+Data and Asimov (MC-Asimov or data-Asimov) on the same canvas:
+pulls/constraints on the left, impacts on the POI on the right.
+The standard plotImpacts.py accepts only one json, hence plotImpactsObsExp.py.
+
+Run:
+
+    text2workspace.py datacard.txt -m 125 -o ws.root
+
+Data:
+
+    combineTool.py -M Impacts -d ws.root -m 125 --robustFit 1 --doInitialFit -n .data
+    combineTool.py -M Impacts -d ws.root -m 125 --robustFit 1 --doFits --parallel 8 -n .data
+    combineTool.py -M Impacts -d ws.root -m 125 -o impacts_data.json -n .data
+
+MC-Asimov (pre-fit nuisances, r=1):
+
+    combineTool.py -M Impacts -d ws.root -m 125 --robustFit 1 -t -1 --expectSignal 1 --doInitialFit -n .asimov
+    combineTool.py -M Impacts -d ws.root -m 125 --robustFit 1 -t -1 --expectSignal 1 --doFits --parallel 8 -n .asimov
+    combineTool.py -M Impacts -d ws.root -m 125 -t -1 --expectSignal 1 -o impacts_asimov.json -n .asimov
+
+data-Asimov (nuisances at the values fitted on data, r=1): same as MC-Asimov adding
+
+    --toysFrequentist
+
+Plot:
+
+    python plotImpactsObsExp.py -i impacts_data.json -e impacts_asimov.json -t translate.json -o impacts
+
+    python plotImpactsObsExp.py -i impacts_data.json -e impacts_asimov.json -t translate.json -o impacts \
+                                --expLabel "data Asimov" -n 30 -c Preliminary
+
+Where:
+
+    -i              observed json (black points, coloured lines)
+    -e              expected json (grey band, coloured boxes)
+    -t              json {"nuisance_name": "label"} for the parameter names (TLatex)
+    -n              number of parameters shown, sorted by impact (--sortBy obs/exp)
+    -p              POI (default: first in the json)
+    -b              do not print the observed best fit value
+    --expLabel      legend label of the expected, e.g. "MC Asimov", "data Asimov"
+
+NB: pull definition as default in plotImpacts.py: (theta_fit - theta_0)/sigma_prefit, asymmetric errors.
+NB: impacts are signed: Delta r when the nuisance is moved to theta_fit +1 sigma (red) and -1 sigma (blue).
+NB: the -n names (.data, .asimov) keep the two sets of fits separated in the same folder.
+NB: plotImpactsObsExp.py works with python2 and python3.
+
+Test without combine (fake json), results in output/ (not in git):
+
+    mkdir -p output
+    cd output
+    python ../makeFakeImpacts.py
+    python ../plotImpactsObsExp.py -i impacts_data.json -e impacts_asimov.json -t ../translate.json -o test_impacts
