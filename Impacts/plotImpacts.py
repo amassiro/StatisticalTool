@@ -39,7 +39,7 @@ parser.add_argument("-e", "--exp",       default=None, help="json with expected 
 parser.add_argument("-o", "--output",    default="impacts", help="output name (without extension)")
 parser.add_argument("-t", "--translate", default=None, help="json file to rename parameters, {name: label}")
 parser.add_argument("-p", "--POI",       default=None, help="POI to draw (default: first one)")
-parser.add_argument("-n", "--per-page",  type=int, default=30, help="number of parameters to show per page")
+parser.add_argument("-n", "--per-page",  type=int, default=20, help="number of parameters to show per page")
 parser.add_argument("-m", "--max-pages", type=int, default=None, help="maximum number of pages to write")
 parser.add_argument("-s", "--sortBy",    default="obs", choices=["obs", "exp"], help="sort parameters by obs or exp impact")
 parser.add_argument("-x", "--pullRange", type=float, default=2.7, help="x range of the pull panel")

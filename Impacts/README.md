@@ -156,7 +156,7 @@ Where:
     -i              observed json (black points, coloured lines)
     -e              expected json (grey band, coloured boxes)
     -t              json {"nuisance_name": "label"} for the parameter names (TLatex)
-    -n              number of parameters per page (--per-page, default 30)
+    -n              number of parameters per page (--per-page, default 20)
     -m              maximum number of pages (--max-pages, default all)
     -s              sort by obs or exp impact (--sortBy obs/exp, default obs)
     -p              POI (default: first in the json)
