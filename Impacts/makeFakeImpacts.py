@@ -22,6 +22,10 @@ def make(asimov):
     r0 = 1.0 if asimov else 0.97
     params.append({"name": n, "type": "Gaussian", "groups": [], "prefit": [-1., 0., 1.],
                    "fit": fit, "r": [r0 + dn, r0, r0 + up], "impact_r": max(abs(up), abs(dn))})
+  # unconstrained parameter (e.g. rateParam), different values in data and Asimov
+  fit = [0.89, 1.00, 1.12] if asimov else [0.95, 1.083, 1.21]
+  params.append({"name": "rate_WjetsBC", "type": "Unconstrained", "groups": [], "prefit": [0., 1., 2.],
+                 "fit": fit, "r": [0.983, 1.0, 1.014] if asimov else [0.952, 0.97, 0.985], "impact_r": 0.018})
   r0 = 1.0 if asimov else 0.97
   return {"POIs": [{"name": "r", "fit": [r0 - 0.04, r0, r0 + 0.04]}], "params": params, "method": "default"}
 

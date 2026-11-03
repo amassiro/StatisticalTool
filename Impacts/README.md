@@ -165,6 +165,9 @@ NB: pull definition as default in combine plotImpacts.py: (theta_fit - theta_0)/
 NB: impacts are signed: Delta r when the nuisance is moved to theta_fit +1 sigma (red) and -1 sigma (blue).
 NB: the -n names (.data, .asimov) keep the two sets of fits separated in the same folder.
 NB: the local plotImpacts.py works with python2 and python3.
+NB: unconstrained parameters (e.g. rateParam) have no pull: the fitted value is written instead,
+    observed on the upper line and expected on the lower one (double height row), as taken from the two json.
+    PDG rounding from combine if available, otherwise 2 significant digits on the uncertainty.
 NB: "python plotImpacts.py" runs the local script, "plotImpacts.py" (no python) runs the combine one in the PATH.
 
 Test without combine (fake json), results in output/ (not in git):
