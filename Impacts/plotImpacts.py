@@ -49,7 +49,7 @@ parser.add_argument("-c", "--cmsLabel",  default="", help="label next to CMS, e.
 parser.add_argument("--obsLabel",        default="obs.", help="label for the observed json in the legend")
 parser.add_argument("--expLabel",        default="exp.", help="label for the expected json in the legend, e.g. 'MC Asimov' or 'data Asimov'")
 parser.add_argument("-b", "--blind",     action="store_true", help="do not print the observed best fit value")
-parser.add_argument("--labelSize",       type=float, default=0.030, help="text size of the parameter names")
+parser.add_argument("--labelSize",       type=int, default=16, help="text size of the parameter names, in pixels")
 parser.add_argument("--width",           type=int, default=650, help="canvas width")
 parser.add_argument("--rowHeight",       type=int, default=25, help="height of one row in pixels")
 args = parser.parse_args()
@@ -235,7 +235,7 @@ def drawPage(names, page, npages, first_rank):
   # ---- parameter names
   latex = ROOT.TLatex()
   latex.SetNDC()
-  latex.SetTextFont(42)
+  latex.SetTextFont(43)  # size in pixels, independent of the canvas height
   latex.SetTextSize(args.labelSize)
   latex.SetTextAlign(32)
   for i, name in enumerate(names):
@@ -244,8 +244,8 @@ def drawPage(names, page, npages, first_rank):
   # ---- rank of the parameter (as in the original)
   rank = ROOT.TLatex()
   rank.SetNDC()
-  rank.SetTextFont(42)
-  rank.SetTextSize(0.8 * args.labelSize)
+  rank.SetTextFont(43)
+  rank.SetTextSize(int(0.75 * args.labelSize))
   rank.SetTextAlign(12)
   rank.SetTextColor(ROOT.kGray + 2)
   for i, name in enumerate(names):
@@ -308,8 +308,8 @@ def drawPage(names, page, npages, first_rank):
   # Values taken from the "fit" field of each json
   #
   unc_text = ROOT.TLatex()
-  unc_text.SetTextFont(42)
-  unc_text.SetTextSize(0.034)
+  unc_text.SetTextFont(43)
+  unc_text.SetTextSize(args.labelSize - 2)
   unc_text.SetTextAlign(22)
   for i, name in enumerate(names):
     y = row_center[i]
