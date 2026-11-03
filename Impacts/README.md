@@ -122,7 +122,7 @@ Impact plots, observed and expected overlaid
 
 Data and Asimov (MC-Asimov or data-Asimov) on the same canvas:
 pulls/constraints on the left, impacts on the POI on the right.
-The standard plotImpacts.py accepts only one json, hence plotImpactsObsExp.py.
+The standard plotImpacts.py of combine accepts only one json, hence the local plotImpacts.py.
 
 Run:
 
@@ -146,9 +146,9 @@ data-Asimov (nuisances at the values fitted on data, r=1): same as MC-Asimov add
 
 Plot:
 
-    python plotImpactsObsExp.py -i impacts_data.json -e impacts_asimov.json -t translate.json -o impacts
+    python plotImpacts.py -i impacts_data.json -e impacts_asimov.json -t translate.json -o impacts
 
-    python plotImpactsObsExp.py -i impacts_data.json -e impacts_asimov.json -t translate.json -o impacts \
+    python plotImpacts.py -i impacts_data.json -e impacts_asimov.json -t translate.json -o impacts \
                                 --expLabel "data Asimov" -n 30 -c Preliminary
 
 Where:
@@ -161,17 +161,18 @@ Where:
     -b              do not print the observed best fit value
     --expLabel      legend label of the expected, e.g. "MC Asimov", "data Asimov"
 
-NB: pull definition as default in plotImpacts.py: (theta_fit - theta_0)/sigma_prefit, asymmetric errors.
+NB: pull definition as default in combine plotImpacts.py: (theta_fit - theta_0)/sigma_prefit, asymmetric errors.
 NB: impacts are signed: Delta r when the nuisance is moved to theta_fit +1 sigma (red) and -1 sigma (blue).
 NB: the -n names (.data, .asimov) keep the two sets of fits separated in the same folder.
-NB: plotImpactsObsExp.py works with python2 and python3.
+NB: the local plotImpacts.py works with python2 and python3.
+NB: "python plotImpacts.py" runs the local script, "plotImpacts.py" (no python) runs the combine one in the PATH.
 
 Test without combine (fake json), results in output/ (not in git):
 
     mkdir -p output
     cd output
     python ../makeFakeImpacts.py
-    python ../plotImpactsObsExp.py -i impacts_data.json -e impacts_asimov.json -t ../translate.json -o test_impacts
+    python ../plotImpacts.py -i impacts_data.json -e impacts_asimov.json -t ../translate.json -o test_impacts
 
 
 
@@ -195,7 +196,7 @@ Example, full chain:
 
     # plot, results in output/
     mkdir -p output
-    python plotImpactsObsExp.py -i impacts_data.json -e impacts_asimov.json -t translate.json -o output/impacts
-    python plotImpactsObsExp.py -i impacts_data.json -e impacts_asimov.json -t translate.json -o output/impacts_dataAsimov --expLabel "data Asimov" -n 30 -c Preliminary
-    python plotImpactsObsExp.py -e impacts_asimov.json -t translate.json -o output/impacts_expOnly --expLabel "MC Asimov"
+    python plotImpacts.py -i impacts_data.json -e impacts_asimov.json -t translate.json -o output/impacts
+    python plotImpacts.py -i impacts_data.json -e impacts_asimov.json -t translate.json -o output/impacts_dataAsimov --expLabel "data Asimov" -n 30 -c Preliminary
+    python plotImpacts.py -e impacts_asimov.json -t translate.json -o output/impacts_expOnly --expLabel "MC Asimov"
 

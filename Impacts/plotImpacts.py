@@ -70,7 +70,7 @@ def readImpacts(fileName, poiName):
     res["impact"] = max(abs(res["impact_hi"]), abs(res["impact_lo"]))
     res["constrained"] = (ele["type"] != "Unconstrained")
     if res["constrained"]:
-      # same definition as the default one in plotImpacts.py
+      # same definition as the default one in combine plotImpacts.py
       pre = ele["prefit"]
       fit = ele["fit"]
       pre_err_hi = pre[2] - pre[1]
