@@ -179,7 +179,11 @@ Test without combine (fake json), results in output/ (not in git):
     mkdir -p output
     cd output
     python ../makeFakeImpacts.py
-    python ../plotImpacts.py -i impacts_data.json -e impacts_asimov.json -t ../translate.json -o test_impacts
+    python ../plotImpacts.py -i impacts_data.json -e impacts_asimov.json -t ../translate.json -o test_impacts -n 10
+
+Where:
+
+    27 fake parameters, 10 per page: test_impacts.pdf with 3 pages, test_impacts_page1.png ... test_impacts_page3.png
 
 
 
