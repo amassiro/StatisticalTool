@@ -1,0 +1,8 @@
+{
+  "CMS_btag_HF_corr": "Heavy flavour corr. b tagging",
+  "WjetsBC_norm": "W+jets b+c normalization",
+  "CMS_pileup": "PU reweighting",
+  "CMS_JES_RelPt_2022": "JES Relative p_{T} 2022",
+  "QCDscale_muF_tch": "#mu_{F} scale t channel",
+  "prop_binch1_bin11": "MC stat. bin 11"
+}
